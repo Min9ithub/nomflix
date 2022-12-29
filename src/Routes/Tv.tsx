@@ -45,9 +45,15 @@ function Tv() {
         <Loader>Loading...</Loader>
       ) : (
         <>
-          <Banner bgPhoto={makeImagePath(data?.results[0].backdrop_path || "")}>
-            <Title>{data?.results[0].name}</Title>
-            <Overview>{data?.results[0].overview}</Overview>
+          <Banner
+            bgPhoto={makeImagePath(
+              data?.results[1].backdrop_path ||
+                data?.results[1].poster_path ||
+                ""
+            )}
+          >
+            <Title>{data?.results[1].name}</Title>
+            <Overview>{data?.results[1].overview}</Overview>
           </Banner>
         </>
       )}
