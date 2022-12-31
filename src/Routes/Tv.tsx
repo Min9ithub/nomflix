@@ -1,6 +1,7 @@
 import { useQuery } from "react-query";
 import styled from "styled-components";
 import { getTv, IGetTvResult } from "../api";
+import SliderTvs from "../Components/SliderTvs";
 import { makeImagePath } from "../utils";
 
 const Wrapper = styled.div`
@@ -55,6 +56,7 @@ function Tv() {
             <Title>{data?.results[1].name}</Title>
             <Overview>{data?.results[1].overview}</Overview>
           </Banner>
+          <SliderTvs />
         </>
       )}
     </Wrapper>
