@@ -1,9 +1,8 @@
 import { AnimatePresence, motion, Variants, useScroll } from "framer-motion";
 import { useState } from "react";
-import { useQuery } from "react-query";
 import { PathMatch, useMatch, useNavigate } from "react-router-dom";
 import styled from "styled-components";
-import { getMovies, IGetMoviesResult } from "../api";
+import { IGetMoviesResult } from "../api";
 import { makeImagePath, useWindowDimensions } from "../utils";
 
 const SliderRow = styled.div`
@@ -11,6 +10,11 @@ const SliderRow = styled.div`
   height: 200px;
   top: -100px;
   margin-bottom: 80px;
+`;
+
+const Title = styled.div`
+  font-size: 30px;
+  margin-bottom: 10px;
 `;
 
 const Row = styled(motion.div)`
@@ -165,16 +169,16 @@ const infoVariants: Variants = {
 
 const offset = 6;
 
-function Sliders() {
+interface ISlider {
+  data: IGetMoviesResult;
+  title: string;
+}
+
+function Sliders({ data, title }: ISlider) {
   const width = useWindowDimensions();
   const navigate = useNavigate();
   const bigMovieMatch: PathMatch<string> | null = useMatch("/movies/:movieId");
   const { scrollY } = useScroll();
-  const { data } = useQuery<IGetMoviesResult>(
-    ["movies", "now playing"],
-    getMovies
-  );
-
   const [index, setIndex] = useState(0);
   const [leaving, setLeaving] = useState(false);
   const [clickReverse, setClickReverse] = useState(false);
@@ -219,6 +223,7 @@ function Sliders() {
   return (
     <>
       <SliderRow>
+        <Title>{title}</Title>
         <AnimatePresence
           initial={false}
           onExitComplete={toggleLeaving}
@@ -276,7 +281,6 @@ function Sliders() {
           </svg>
         </SliderBtn>
       </SliderRow>
-
       <AnimatePresence>
         {bigMovieMatch ? (
           <>
