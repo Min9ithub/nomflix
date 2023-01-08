@@ -14,6 +14,7 @@ const Nav = styled(motion.nav)`
   font-size: 14px;
   padding: 20px 60px;
   color: white;
+  z-index: 99;
 `;
 
 const Col = styled.div`
@@ -130,6 +131,7 @@ function Header() {
     }
     setSearchOpen((prev) => !prev);
   };
+
   useEffect(() => {
     scrollY.onChange(() => {
       if (scrollY.get() > 80) {
@@ -140,7 +142,7 @@ function Header() {
     });
   }, [scrollY, navAnimation]);
   const navigate = useNavigate();
-  const { register, handleSubmit } = useForm<IForm>();
+  const { register, handleSubmit, setFocus } = useForm<IForm>();
   const onValid = (data: IForm) => {
     navigate(`/search?keyword=${data.keyword}`);
   };
@@ -174,7 +176,10 @@ function Header() {
       <Col>
         <Search onSubmit={handleSubmit(onValid)}>
           <motion.svg
-            onClick={toggleSearch}
+            onClick={() => {
+              toggleSearch();
+              setFocus("keyword");
+            }}
             animate={{ x: searchOpen ? -210 : 0 }}
             transition={{ type: "linear" }}
             fill="currentColor"
