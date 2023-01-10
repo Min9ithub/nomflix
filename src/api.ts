@@ -92,8 +92,8 @@ export interface IGetSearchResult {
   total_results: number;
 }
 
-// export function getSearch() {
-//   return fetch(
-//     `${BASE_PATH}/search/multi?api_key=${API_KEY}&query=${keyword}`
-//   ).then((response) => response.json());
-// }
+export function getSearch(keyword: string | null) {
+  return fetch(
+    `${BASE_PATH}/search/multi?api_key=${API_KEY}&query=${keyword}`
+  ).then((response) => response.json());
+}
