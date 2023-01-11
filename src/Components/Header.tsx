@@ -57,6 +57,7 @@ const Search = styled.form`
   align-items: center;
   position: relative;
   svg {
+    cursor: pointer;
     height: 25px;
   }
 `;
