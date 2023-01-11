@@ -3,7 +3,6 @@ import { RecoilRoot } from "recoil";
 import { ThemeProvider, createGlobalStyle } from "styled-components";
 import { QueryClient, QueryClientProvider } from "react-query";
 import { theme } from "./theme";
-import { RouterProvider } from "react-router-dom";
 import App from "./App";
 
 const GlobalStyle = createGlobalStyle`
