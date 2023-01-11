@@ -1,4 +1,4 @@
-import { createBrowserRouter } from "react-router-dom";
+import { createBrowserRouter, Link } from "react-router-dom";
 import ErrorComponent from "./Components/ErrorComponent";
 import NotFound from "./NotFound";
 import Root from "./Root";
@@ -40,5 +40,6 @@ const router = createBrowserRouter(
   ],
   { basename: "/" }
 );
+<Link to="/" />;
 
 export default router;
