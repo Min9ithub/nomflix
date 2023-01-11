@@ -1,9 +1,8 @@
-import { motion, AnimatePresence, Variants } from "framer-motion";
+import { AnimatePresence, motion, useScroll, Variants } from "framer-motion";
 import { useState } from "react";
-import { useQuery } from "react-query";
-import { useNavigate } from "react-router-dom";
+import { PathMatch, useMatch, useNavigate } from "react-router-dom";
 import styled from "styled-components";
-import { getMovies, getTv, IGetTvResult } from "../api";
+import { IGetTvResult } from "../api";
 import { makeImagePath, useWindowDimensions } from "../utils";
 
 const SliderRow = styled.div`
@@ -11,6 +10,11 @@ const SliderRow = styled.div`
   height: 200px;
   top: -100px;
   margin-bottom: 80px;
+`;
+
+const Title = styled.div`
+  font-size: 30px;
+  margin-bottom: 10px;
 `;
 
 const Row = styled(motion.div)`
@@ -70,9 +74,47 @@ const Info = styled(motion.div)`
   }
 `;
 
-const TvType = styled.div`
-  font-size: 30px;
-  margin-bottom: 10px;
+const Overlay = styled(motion.div)`
+  position: fixed;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  opacity: 0;
+`;
+
+const BigTv = styled(motion.div)`
+  position: absolute;
+  width: 40vw;
+  height: 80vh;
+  left: 0;
+  right: 0;
+  margin: 0 auto;
+  border-radius: 15px;
+  overflow: hidden;
+  background-color: ${(props) => props.theme.black.lighter};
+`;
+
+const BigCover = styled.div`
+  width: 100%;
+  height: 400px;
+  background-size: cover;
+  background-position: center center;
+`;
+
+const BigTitle = styled.h3`
+  color: ${(props) => props.theme.white.lighter};
+  padding: 20px;
+  font-size: 46px;
+  position: relative;
+  top: -80px;
+`;
+
+const BigOverview = styled.p`
+  padding: 20px;
+  position: relative;
+  top: -80px;
+  color: ${(props) => props.theme.white.lighter};
 `;
 
 const rowVariants = {
@@ -127,10 +169,16 @@ const infoVariants: Variants = {
 
 const offset = 6;
 
-function SliderTvs() {
+interface ISlider {
+  data: IGetTvResult;
+  title: string;
+}
+
+function SliderTvs({ data, title }: ISlider) {
   const width = useWindowDimensions();
   const navigate = useNavigate();
-  const { data } = useQuery<IGetTvResult>(["movies", "now playing"], getTv);
+  const bigTvMatch: PathMatch<string> | null = useMatch("/tv/:tvId");
+  const { scrollY } = useScroll();
   const [index, setIndex] = useState(0);
   const [leaving, setLeaving] = useState(false);
   const [clickReverse, setClickReverse] = useState(false);
@@ -162,14 +210,19 @@ function SliderTvs() {
   };
 
   const toggleLeaving = () => setLeaving((prev) => !prev);
-  const onBoxClicked = (movie: number) => {
-    navigate(`/movies/${movie}`);
+  const onBoxClicked = (tv: number) => {
+    navigate(`/tv/${tv}`);
   };
+
+  const onOverlayClick = () => navigate("/tv");
+  const clickedTv =
+    bigTvMatch?.params.tvId &&
+    data?.results.find((tv) => tv.id + "" === bigTvMatch.params.tvId);
 
   return (
     <>
       <SliderRow>
-        <TvType>On The Air</TvType>
+        <Title>{title}</Title>
         <AnimatePresence
           initial={false}
           onExitComplete={toggleLeaving}
@@ -187,22 +240,22 @@ function SliderTvs() {
             {data?.results
               .slice(1)
               .slice(offset * index, offset * index + offset)
-              .map((movie) => (
+              .map((tv) => (
                 <Box
-                  layoutId={movie.id + ""}
-                  key={movie.id}
+                  layoutId={tv.id + ""}
+                  key={tv.id}
                   whileHover="hover"
                   initial="normal"
                   variants={boxVariants}
-                  onClick={() => onBoxClicked(movie.id)}
+                  onClick={() => onBoxClicked(tv.id)}
                   transition={{ type: "tween" }}
                   bgPhoto={makeImagePath(
-                    movie.backdrop_path || movie.poster_path,
+                    tv.backdrop_path || tv.poster_path,
                     "w500"
                   )}
                 >
                   <Info variants={infoVariants}>
-                    <h4>{movie.name}</h4>
+                    <h4>{tv.name}</h4>
                   </Info>
                 </Box>
               ))}
@@ -227,6 +280,37 @@ function SliderTvs() {
           </svg>
         </SliderBtn>
       </SliderRow>
+
+      <AnimatePresence>
+        {bigTvMatch ? (
+          <>
+            <Overlay
+              onClick={onOverlayClick}
+              exit={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+            />
+            <BigTv
+              style={{ top: scrollY.get() + 100 }}
+              layoutId={bigTvMatch.params.tvId}
+            >
+              {clickedTv && (
+                <>
+                  <BigCover
+                    style={{
+                      backgroundImage: `linear-gradient(to top, black, transparent), url(${makeImagePath(
+                        clickedTv.backdrop_path || clickedTv.poster_path,
+                        "w500"
+                      )})`,
+                    }}
+                  />
+                  <BigTitle>{clickedTv.name}</BigTitle>
+                  <BigOverview>{clickedTv.overview}</BigOverview>
+                </>
+              )}
+            </BigTv>
+          </>
+        ) : null}
+      </AnimatePresence>
     </>
   );
 }

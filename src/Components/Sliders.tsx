@@ -117,7 +117,7 @@ const BigOverview = styled.p`
   color: ${(props) => props.theme.white.lighter};
 `;
 
-const rowVariants = {
+const rowVariants: Variants = {
   hidden: ({
     width,
     clickReverse,
@@ -127,9 +127,11 @@ const rowVariants = {
   }) => ({
     x: clickReverse ? -width - 5 : width + 5,
   }),
+
   visible: {
     x: 0,
   },
+
   exit: ({
     width,
     clickReverse,
