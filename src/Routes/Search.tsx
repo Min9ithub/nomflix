@@ -4,7 +4,7 @@ import { useQuery } from "react-query";
 import { useLocation } from "react-router-dom";
 import styled from "styled-components";
 import { getSearch, IGetSearchResult } from "../api";
-import { makeImagePath, useWindowDimensions } from "../utils";
+import { makeImagePath } from "../utils";
 
 const Wrapper = styled.div`
   background-color: black;
@@ -17,7 +17,7 @@ const Loader = styled.div`
   align-items: center;
 `;
 
-const Row = styled(motion.div)`
+const Row = styled.div`
   display: grid;
   gap: 5px;
   grid-template-columns: repeat(5, 1fr);
@@ -40,20 +40,6 @@ const Box = styled(motion.div)<{ bgPhoto: string }>`
   }
 `;
 
-const rowVariants: Variants = {
-  hidden: {
-    x: window.outerWidth + 5,
-  },
-
-  visible: {
-    x: 0,
-  },
-
-  exit: {
-    x: window.outerWidth - 5,
-  },
-};
-
 const boxVariants: Variants = {
   normal: {
     scale: 1,
@@ -72,8 +58,6 @@ const boxVariants: Variants = {
 const offset = 5;
 
 function Search() {
-  const width = useWindowDimensions();
-  const [clickReverse, setClickReverse] = useState(false);
   const location = useLocation();
   const keyword = new URLSearchParams(location.search).get("keyword");
   const [index, setIndex] = useState(0);
@@ -87,14 +71,7 @@ function Search() {
         <Loader>Loading...</Loader>
       ) : (
         <>
-          <Row
-            variants={rowVariants}
-            initial="hidden"
-            animate="visible"
-            exit="exit"
-            transition={{ type: "tween", duration: 1 }}
-            custom={{ width, clickReverse }}
-          >
+          <Row>
             {data?.results
               .slice(0)
               .slice(offset * index, offset * index + offset)
