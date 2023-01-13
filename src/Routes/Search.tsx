@@ -61,8 +61,9 @@ function Search() {
   const location = useLocation();
   const keyword = new URLSearchParams(location.search).get("keyword");
   const [index, setIndex] = useState(0);
-  const { data, isLoading } = useQuery<IGetSearchResult>(["search"], () =>
-    getSearch(keyword)
+  const { data, isLoading } = useQuery<IGetSearchResult>(
+    ["search", keyword],
+    () => getSearch(keyword)
   );
 
   return (
