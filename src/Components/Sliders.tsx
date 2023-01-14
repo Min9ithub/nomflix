@@ -25,19 +25,22 @@ const Row = styled(motion.div)`
   width: 100%;
 `;
 
-const Box = styled(motion.div)<{ bgPhoto: string }>`
-  background-color: white;
-  background-image: url(${(props) => props.bgPhoto});
+const Box = styled(motion.div)`
   background-size: cover;
   background-position: center center;
   height: 200px;
-  font-size: 66px;
   cursor: pointer;
   &:first-child {
     transform-origin: center left;
   }
   &:last-child {
     transform-origin: center right;
+  }
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    margin: 0;
   }
 `;
 
@@ -252,11 +255,15 @@ function Sliders({ data, title }: ISlider) {
                   variants={boxVariants}
                   onClick={() => onBoxClicked(movie.id)}
                   transition={{ type: "tween" }}
-                  bgPhoto={makeImagePath(
-                    movie.backdrop_path || movie.poster_path,
-                    "w500"
-                  )}
+                  // $bgPhoto={makeImagePath(
+                  //   movie.backdrop_path || movie.poster_path,
+                  //   "w500"
+                  // )}
                 >
+                  <img
+                    src={makeImagePath(movie.backdrop_path, "w500")}
+                    alt={movie.title}
+                  />
                   <Info variants={infoVariants}>
                     <h4>{movie.title}</h4>
                   </Info>
