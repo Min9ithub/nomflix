@@ -25,7 +25,8 @@ const Row = styled(motion.div)`
   width: 100%;
 `;
 
-const Box = styled(motion.div)`
+const Box = styled(motion.div)<{ $bgPhoto: string }>`
+  background-image: url(${(props) => props.$bgPhoto});
   background-size: cover;
   background-position: center center;
   height: 200px;
@@ -35,12 +36,6 @@ const Box = styled(motion.div)`
   }
   &:last-child {
     transform-origin: center right;
-  }
-  img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    margin: 0;
   }
 `;
 
@@ -120,6 +115,8 @@ const BigOverview = styled.p`
   color: ${(props) => props.theme.white.lighter};
 `;
 
+const BigRank = styled(BigOverview)``;
+
 const rowVariants: Variants = {
   hidden: ({
     width,
@@ -182,7 +179,8 @@ interface ISlider {
 function Sliders({ data, title }: ISlider) {
   const width = useWindowDimensions();
   const navigate = useNavigate();
-  const bigMovieMatch: PathMatch<string> | null = useMatch("/movies/:movieId");
+  const modalMovieMatch: PathMatch<string> | null =
+    useMatch("/movies/:movieId");
   const { scrollY } = useScroll();
   const [index, setIndex] = useState(0);
   const [leaving, setLeaving] = useState(false);
@@ -221,9 +219,9 @@ function Sliders({ data, title }: ISlider) {
 
   const onOverlayClick = () => navigate("/");
   const clickedMovie =
-    bigMovieMatch?.params.movieId &&
+    modalMovieMatch?.params.movieId &&
     data?.results.find(
-      (movie) => movie.id + "" === bigMovieMatch.params.movieId
+      (movie) => movie.id + "" === modalMovieMatch.params.movieId
     );
   return (
     <>
@@ -255,15 +253,11 @@ function Sliders({ data, title }: ISlider) {
                   variants={boxVariants}
                   onClick={() => onBoxClicked(movie.id)}
                   transition={{ type: "tween" }}
-                  // $bgPhoto={makeImagePath(
-                  //   movie.backdrop_path || movie.poster_path,
-                  //   "w500"
-                  // )}
+                  $bgPhoto={makeImagePath(
+                    movie.backdrop_path || movie.poster_path,
+                    "w500"
+                  )}
                 >
-                  <img
-                    src={makeImagePath(movie.backdrop_path, "w500")}
-                    alt={movie.title}
-                  />
                   <Info variants={infoVariants}>
                     <h4>{movie.title}</h4>
                   </Info>
@@ -291,7 +285,7 @@ function Sliders({ data, title }: ISlider) {
         </SliderBtn>
       </SliderRow>
       <AnimatePresence>
-        {bigMovieMatch ? (
+        {modalMovieMatch ? (
           <>
             <Overlay
               onClick={onOverlayClick}
@@ -300,7 +294,7 @@ function Sliders({ data, title }: ISlider) {
             />
             <BigMovie
               style={{ top: scrollY.get() + 100 }}
-              layoutId={bigMovieMatch.params.movieId}
+              layoutId={modalMovieMatch.params.movieId}
             >
               {clickedMovie && (
                 <>
@@ -314,6 +308,7 @@ function Sliders({ data, title }: ISlider) {
                   />
                   <BigTitle>{clickedMovie.title}</BigTitle>
                   <BigOverview>{clickedMovie.overview}</BigOverview>
+                  <BigRank>{clickedMovie.vote_average}</BigRank>
                 </>
               )}
             </BigMovie>
