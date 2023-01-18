@@ -20,18 +20,20 @@ const Loader = styled.div`
 const Row = styled.div`
   display: grid;
   gap: 5px;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(6, 1fr);
   margin: 0 55px;
+  margin-top: 200px;
 `;
 
 const Box = styled(motion.div)<{ bgPhoto: string }>`
-  margin-top: 200px;
+  margin-bottom: 100px;
   background-color: white;
   background-image: url(${(props) => props.bgPhoto});
   background-size: cover;
   background-position: center center;
   width: 200px;
   height: 275px;
+  cursor: pointer;
   &:first-child {
     transform-origin: center left;
   }
@@ -46,7 +48,6 @@ const boxVariants: Variants = {
   },
   hover: {
     scale: 1.3,
-    y: -50,
     transition: {
       delay: 0.5,
       duration: 0.3,
@@ -55,7 +56,7 @@ const boxVariants: Variants = {
   },
 };
 
-const offset = 5;
+// const offset = 30;
 
 function Search() {
   const location = useLocation();
@@ -75,21 +76,19 @@ function Search() {
           <Row>
             {data?.results
               .slice(0)
-              .slice(offset * index, offset * index + offset)
+              .slice(
+                data.results.length * index,
+                data.results.length * index + data.results.length
+              )
               .map((data) => (
                 <Box
                   key={data.id}
                   whileHover="hover"
                   initial="normal"
                   transition={{ type: "tween" }}
-                  bgPhoto={makeImagePath(
-                    data.backdrop_path || data.poster_path,
-                    "w500"
-                  )}
+                  bgPhoto={makeImagePath(data.poster_path, "w500")}
                   variants={boxVariants}
-                >
-                  <p>{data.title}</p>
-                </Box>
+                ></Box>
               ))}
           </Row>
         </>
