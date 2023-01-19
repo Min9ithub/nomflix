@@ -1,8 +1,15 @@
 import { AnimatePresence, motion, Variants, useScroll } from "framer-motion";
 import { useState } from "react";
-import { PathMatch, useMatch, useNavigate } from "react-router-dom";
+import { useQuery } from "react-query";
+import { useMatch, useNavigate } from "react-router-dom";
 import styled from "styled-components";
-import { IGetMoviesResult } from "../api";
+import {
+  getActor,
+  getGenres,
+  IGetActorResult,
+  IGetGenreResult,
+  IGetMoviesResult,
+} from "../api";
 import { makeImagePath, useWindowDimensions } from "../utils";
 
 const SliderRow = styled.div`
@@ -84,7 +91,7 @@ const Overlay = styled(motion.div)`
 const BigMovie = styled(motion.div)`
   position: absolute;
   width: 40vw;
-  height: 80vh;
+  height: 100vh;
   left: 0;
   right: 0;
   margin: 0 auto;
@@ -105,17 +112,44 @@ const BigTitle = styled.h3`
   padding: 20px;
   font-size: 46px;
   position: relative;
-  top: -80px;
+  bottom: 80px;
 `;
 
 const BigOverview = styled.p`
-  padding: 20px;
   position: relative;
-  top: -80px;
+  bottom: 80px;
   color: ${(props) => props.theme.white.lighter};
 `;
 
-const BigRank = styled(BigOverview)``;
+const BigRank = styled.p`
+  position: relative;
+  bottom: 80px;
+  text-align: right;
+  color: ${(props) => props.theme.white.lighter};
+`;
+
+// const Actors = styled.div`
+//   display: flex;
+//   justify-content: end;
+// `;
+
+const BigActor = styled.p`
+  position: relative;
+  bottom: 80px;
+  margin-left: 10px;
+  right: 5px;
+  text-align: right;
+  color: ${(props) => props.theme.white.lighter};
+`;
+
+const BigGenre = styled.p`
+  position: relative;
+  bottom: 80px;
+  margin-left: 10px;
+  right: 5px;
+  text-align: right;
+  color: ${(props) => props.theme.white.lighter};
+`;
 
 const rowVariants: Variants = {
   hidden: ({
@@ -179,8 +213,9 @@ interface ISlider {
 function Sliders({ data, title }: ISlider) {
   const width = useWindowDimensions();
   const navigate = useNavigate();
-  const modalMovieMatch: PathMatch<string> | null =
-    useMatch("/movies/:movieId");
+  // const modalMovieMatch: PathMatch<string> | null =
+  //   useMatch("/movies/:movieId");
+  const modalMovieMatch = useMatch("/movies/:movieId");
   const { scrollY } = useScroll();
   const [index, setIndex] = useState(0);
   const [leaving, setLeaving] = useState(false);
@@ -221,8 +256,19 @@ function Sliders({ data, title }: ISlider) {
   const clickedMovie =
     modalMovieMatch?.params.movieId &&
     data?.results.find(
-      (movie) => movie.id + "" === modalMovieMatch.params.movieId
+      (movie) => movie.id === +modalMovieMatch.params.movieId!
     );
+
+  const { data: actorData } = useQuery<IGetActorResult>(
+    ["actor", modalMovieMatch?.params.movieId],
+    () => getActor(+modalMovieMatch?.params.movieId!)
+  );
+
+  const { data: genreData } = useQuery<IGetGenreResult>(
+    ["genre", modalMovieMatch?.params.movieId],
+    () => getGenres(+modalMovieMatch?.params.movieId!)
+  );
+
   return (
     <>
       <SliderRow>
@@ -296,7 +342,7 @@ function Sliders({ data, title }: ISlider) {
               style={{ top: scrollY.get() + 100 }}
               layoutId={modalMovieMatch.params.movieId}
             >
-              {clickedMovie && (
+              {clickedMovie && actorData && genreData && (
                 <>
                   <BigCover
                     style={{
@@ -307,8 +353,14 @@ function Sliders({ data, title }: ISlider) {
                     }}
                   />
                   <BigTitle>{clickedMovie.title}</BigTitle>
-                  <BigOverview>{clickedMovie.overview}</BigOverview>
                   <BigRank>{clickedMovie.vote_average}</BigRank>
+                  <BigActor>Actor: {actorData.cast[0].name}</BigActor>
+                  <BigActor>{actorData.cast[1].name}</BigActor>
+                  <BigActor>{actorData.cast[2].name}</BigActor>
+                  <BigGenre>Genre: {genreData.genres[0].name}</BigGenre>
+                  <BigGenre>{genreData.genres[1].name}</BigGenre>
+                  <BigGenre>{genreData.genres[2].name}</BigGenre>
+                  <BigOverview>{clickedMovie.overview}</BigOverview>
                 </>
               )}
             </BigMovie>
