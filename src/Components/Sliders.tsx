@@ -133,7 +133,7 @@ const BigRank = styled.p`
 //   justify-content: end;
 // `;
 
-const BigActor = styled.p`
+const BigActor = styled.ul`
   position: relative;
   bottom: 80px;
   margin-left: 10px;
@@ -354,12 +354,17 @@ function Sliders({ data, title }: ISlider) {
                   />
                   <BigTitle>{clickedMovie.title}</BigTitle>
                   <BigRank>{clickedMovie.vote_average}</BigRank>
-                  <BigActor>Actor: {actorData.cast[0].name}</BigActor>
+                  <BigActor>
+                    {actorData.cast.slice(0, 3).map((data) => (
+                      <li key={actorData.id}>{data.name}</li>
+                    ))}
+                  </BigActor>
+                  {/* <BigActor>{`Actor: ${actorData.cast[0].name}`}</BigActor>
                   <BigActor>{actorData.cast[1].name}</BigActor>
-                  <BigActor>{actorData.cast[2].name}</BigActor>
-                  <BigGenre>Genre: {genreData.genres[0].name}</BigGenre>
-                  <BigGenre>{genreData.genres[1].name}</BigGenre>
-                  <BigGenre>{genreData.genres[2].name}</BigGenre>
+                  <BigActor>{actorData.cast[2].name}</BigActor> */}
+                  {/* <BigGenre>{`Genre: ${genreData.genres[0].name}`},</BigGenre>
+                  <BigGenre>{genreData.genres[1].name},</BigGenre>
+                  <BigGenre>{genreData.genres[2].name}</BigGenre> */}
                   <BigOverview>{clickedMovie.overview}</BigOverview>
                 </>
               )}
