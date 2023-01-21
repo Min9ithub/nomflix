@@ -115,39 +115,31 @@ const BigTitle = styled.h3`
   bottom: 80px;
 `;
 
-const BigOverview = styled.p`
-  position: relative;
-  bottom: 80px;
-  color: ${(props) => props.theme.white.lighter};
-`;
-
 const BigRank = styled.p`
   position: relative;
   bottom: 80px;
+  right: 10px;
   text-align: right;
   color: ${(props) => props.theme.white.lighter};
 `;
-
-// const Actors = styled.div`
-//   display: flex;
-//   justify-content: end;
-// `;
 
 const BigActor = styled.ul`
   position: relative;
   bottom: 80px;
-  margin-left: 10px;
   right: 5px;
+  display: flex;
+  justify-content: end;
   text-align: right;
   color: ${(props) => props.theme.white.lighter};
 `;
 
-const BigGenre = styled.p`
+const BigGenre = styled(BigActor)``;
+
+const BigOverview = styled.p`
   position: relative;
+  margin-top: 10px;
+  padding: 0px 10px;
   bottom: 80px;
-  margin-left: 10px;
-  right: 5px;
-  text-align: right;
   color: ${(props) => props.theme.white.lighter};
 `;
 
@@ -353,18 +345,21 @@ function Sliders({ data, title }: ISlider) {
                     }}
                   />
                   <BigTitle>{clickedMovie.title}</BigTitle>
-                  <BigRank>{clickedMovie.vote_average}</BigRank>
+                  <BigRank>
+                    Rate: {clickedMovie.vote_average.toFixed(1)}/ 10.0
+                  </BigRank>
                   <BigActor>
+                    Actor:
                     {actorData.cast.slice(0, 3).map((data) => (
-                      <li key={actorData.id}>{data.name}</li>
+                      <li key={actorData.id}>{"" + data.name + ","}</li>
                     ))}
                   </BigActor>
-                  {/* <BigActor>{`Actor: ${actorData.cast[0].name}`}</BigActor>
-                  <BigActor>{actorData.cast[1].name}</BigActor>
-                  <BigActor>{actorData.cast[2].name}</BigActor> */}
-                  {/* <BigGenre>{`Genre: ${genreData.genres[0].name}`},</BigGenre>
-                  <BigGenre>{genreData.genres[1].name},</BigGenre>
-                  <BigGenre>{genreData.genres[2].name}</BigGenre> */}
+                  <BigGenre>
+                    Genre:
+                    {genreData.genres.slice(0, 3).map((data) => (
+                      <li key={genreData.id}>{data.name + ","}</li>
+                    ))}
+                  </BigGenre>
                   <BigOverview>{clickedMovie.overview}</BigOverview>
                 </>
               )}
