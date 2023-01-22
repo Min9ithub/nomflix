@@ -7,6 +7,7 @@ interface IMovie {
   poster_path: string;
   title: string;
   overview: string;
+  vote_average: number;
 }
 
 export interface IGetMoviesResult {
@@ -96,4 +97,36 @@ export function getSearch(keyword: string | null) {
   return fetch(
     `${BASE_PATH}/search/multi?api_key=${API_KEY}&query=${keyword}`
   ).then((response) => response.json());
+}
+
+interface IActor {
+  name: string;
+  original_name: string;
+}
+
+export interface IGetActorResult {
+  id: number;
+  cast: IActor[];
+}
+
+export function getActor(movie_id: number | undefined) {
+  return fetch(
+    `${BASE_PATH}/movie/${movie_id}/credits?api_key=${API_KEY}`
+  ).then((response) => response.json());
+}
+
+interface IGenre {
+  id: number;
+  name: string;
+}
+
+export interface IGetGenreResult {
+  genres: IGenre[];
+  id: number;
+}
+
+export function getGenres(movie_id: number | undefined) {
+  return fetch(`${BASE_PATH}/movie/${movie_id}?api_key=${API_KEY}`).then(
+    (response) => response.json()
+  );
 }
