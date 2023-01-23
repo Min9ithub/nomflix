@@ -1,7 +1,7 @@
 import { motion, Variants } from "framer-motion";
 import { useState } from "react";
 import { useQuery } from "react-query";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import { getSearch, IGetSearchResult } from "../api";
 import { makeImagePath } from "../utils";
@@ -60,12 +60,17 @@ const boxVariants: Variants = {
 
 function Search() {
   const location = useLocation();
+  const navigate = useNavigate();
   const keyword = new URLSearchParams(location.search).get("keyword");
   const [index, setIndex] = useState(0);
   const { data, isLoading } = useQuery<IGetSearchResult>(
     ["search", keyword],
     () => getSearch(keyword)
   );
+
+  const onBoxClicked = (movie: number) => {
+    navigate(`/movies/${movie}`);
+  };
 
   return (
     <Wrapper>
@@ -85,9 +90,10 @@ function Search() {
                   key={data.id}
                   whileHover="hover"
                   initial="normal"
+                  variants={boxVariants}
+                  // onClick={() => onBoxClicked(movie.id)}
                   transition={{ type: "tween" }}
                   bgPhoto={makeImagePath(data.poster_path, "w500")}
-                  variants={boxVariants}
                 ></Box>
               ))}
           </Row>
