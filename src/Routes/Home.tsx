@@ -4,6 +4,7 @@ import {
   IGetMoviesResult,
   getNowPlayingMovies,
   getPopularMovies,
+  getTopRatedMovies,
   // getTopRatedMovies,
   // getUpcomingMovies,
 } from "../api";
@@ -36,29 +37,30 @@ const Title = styled.h2`
   font-size: 68px;
   margin-bottom: 20px;
 `;
+
 const Overview = styled.p`
   font-size: 30px;
   width: 50%;
 `;
 
 function Home() {
-  const { data: nowPlayingMoviesList, isLoading } = useQuery<IGetMoviesResult>(
-    ["nowPlaying", "nowPlayingMovies"],
+  const { data: nowPlaying, isLoading } = useQuery<IGetMoviesResult>(
+    ["movies", "nowPlaying"],
     getNowPlayingMovies
   );
 
-  const { data: popularMoviesList } = useQuery<IGetMoviesResult>(
-    ["popularMovies", "popularMovies"],
-    getPopularMovies
-  );
+  // const { data: popular } = useQuery<IGetMoviesResult>(
+  //   ["moviesdsa", "popular"],
+  //   getPopularMovies
+  // );
 
-  // const { data: topRatedMoviesList } = useQuery<IGetMoviesResult>(
-  //   ["topRatedMovies", "topRatedMovies"],
+  // const { data: topRated } = useQuery<IGetMoviesResult>(
+  //   ["movies", "topRated"],
   //   getTopRatedMovies
   // );
 
   // const { data: upcomingMoviesList } = useQuery<IGetMoviesResult>(
-  //   ["upcomingMovies", "upcomingMovies"],
+  //   ["movies", "upcoming"],
   //   getUpcomingMovies
   // );
 
@@ -69,26 +71,18 @@ function Home() {
       ) : (
         <>
           <Banner
-            bgPhoto={makeImagePath(
-              nowPlayingMoviesList?.results[0].backdrop_path || ""
-            )}
+            bgPhoto={makeImagePath(nowPlaying?.results[0].backdrop_path || "")}
           >
-            <Title>{nowPlayingMoviesList?.results[0].title}</Title>
-            <Overview>{nowPlayingMoviesList?.results[0].overview}</Overview>
+            <Title>{nowPlaying?.results[0].title}</Title>
+            <Overview>{nowPlaying?.results[0].overview}</Overview>
           </Banner>
           <Sliders
-            data={nowPlayingMoviesList as IGetMoviesResult}
+            data={nowPlaying as IGetMoviesResult}
             title={"Now Playing"}
           />
+          {/* <Sliders data={popular as IGetMoviesResult} title={"Popular"} /> */}
+          {/* <Sliders data={topRated as IGetMoviesResult} title={"Top Rated"} /> */}
           {/* <Sliders
-            data={popularMoviesList as IGetMoviesResult}
-            title={"Popular"}
-          />
-          <Sliders
-            data={topRatedMoviesList as IGetMoviesResult}
-            title={"Top Rated"}
-          />
-          <Sliders
             data={upcomingMoviesList as IGetMoviesResult}
             title={"Upcoming"}
           /> */}
