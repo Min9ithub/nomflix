@@ -1,27 +1,22 @@
-import { AnimatePresence, motion, Variants, useScroll } from "framer-motion";
+import { AnimatePresence, motion, useScroll, Variants } from "framer-motion";
 import { useState } from "react";
-import { useQuery } from "react-query";
-import { useMatch, useNavigate } from "react-router-dom";
+import { PathMatch, useMatch, useNavigate } from "react-router-dom";
 import styled from "styled-components";
-import {
-  getActor,
-  getGenres,
-  IGetActorResult,
-  IGetGenreResult,
-  IGetMoviesResult,
-} from "../api";
+import { IGetMoviesResult } from "../api";
 import { makeImagePath, useWindowDimensions } from "../utils";
 
-const SliderRow = styled.div`
+const SliderRow = styled(motion.div)`
   position: relative;
   height: 200px;
   top: -100px;
   margin-bottom: 80px;
 `;
 
-const Title = styled.div`
+const Title = styled.h2`
+  position: absolute;
   font-size: 30px;
-  margin-bottom: 10px;
+  top: -50px;
+  margin-left: 10px;
 `;
 
 const Row = styled(motion.div)`
@@ -46,6 +41,19 @@ const Box = styled(motion.div)<{ $bgPhoto: string }>`
   }
 `;
 
+const Info = styled(motion.div)`
+  padding: 10px;
+  background-color: ${(props) => props.theme.black.lighter};
+  opacity: 0;
+  position: absolute;
+  width: 100%;
+  bottom: 0;
+  h4 {
+    text-align: center;
+    font-size: 18px;
+  }
+`;
+
 const SliderBtn = styled.div<{ isRight: boolean }>`
   position: absolute;
   right: ${(props) => (props.isRight ? 0 : null)};
@@ -66,19 +74,6 @@ const SliderBtn = styled.div<{ isRight: boolean }>`
   }
 `;
 
-const Info = styled(motion.div)`
-  padding: 10px;
-  background-color: ${(props) => props.theme.black.lighter};
-  opacity: 0;
-  position: absolute;
-  width: 100%;
-  bottom: 0;
-  h4 {
-    text-align: center;
-    font-size: 18px;
-  }
-`;
-
 const Overlay = styled(motion.div)`
   position: fixed;
   top: 0;
@@ -91,13 +86,14 @@ const Overlay = styled(motion.div)`
 const BigMovie = styled(motion.div)`
   position: absolute;
   width: 40vw;
-  height: 100vh;
+  height: 80vh;
   left: 0;
   right: 0;
   margin: 0 auto;
   border-radius: 15px;
   overflow: hidden;
   background-color: ${(props) => props.theme.black.lighter};
+  z-index: 2;
 `;
 
 const BigCover = styled.div`
@@ -112,36 +108,17 @@ const BigTitle = styled.h3`
   padding: 20px;
   font-size: 46px;
   position: relative;
-  bottom: 80px;
+  top: -80px;
 `;
-
-const BigRank = styled.p`
-  position: relative;
-  bottom: 80px;
-  right: 10px;
-  text-align: right;
-  color: ${(props) => props.theme.white.lighter};
-`;
-
-const BigActor = styled.ul`
-  position: relative;
-  bottom: 80px;
-  right: 5px;
-  display: flex;
-  justify-content: end;
-  text-align: right;
-  color: ${(props) => props.theme.white.lighter};
-`;
-
-const BigGenre = styled(BigActor)``;
 
 const BigOverview = styled.p`
+  padding: 20px;
   position: relative;
-  margin-top: 10px;
-  padding: 0px 10px;
-  bottom: 80px;
+  top: -80px;
   color: ${(props) => props.theme.white.lighter};
 `;
+
+const BigRank = styled.p``;
 
 const rowVariants: Variants = {
   hidden: ({
@@ -195,22 +172,23 @@ const infoVariants: Variants = {
   },
 };
 
-const offset = 6;
-
 interface ISlider {
-  data: IGetMoviesResult;
+  type: string;
   title: string;
+  data: IGetMoviesResult;
 }
 
-function Sliders({ data, title }: ISlider) {
+function Sliders({ type, title, data }: ISlider) {
   const width = useWindowDimensions();
   const navigate = useNavigate();
-  // const modalMovieMatch: PathMatch<string> | null =
-  //   useMatch("/movies/:movieId");
-  const modalMovieMatch = useMatch("/movies/:movieId");
+  const bigMovieMatch: PathMatch<string> | null = useMatch(
+    `/movies/${type}/:movieId`
+  );
   const { scrollY } = useScroll();
+  const offset = 6;
   const [index, setIndex] = useState(0);
   const [leaving, setLeaving] = useState(false);
+
   const [clickReverse, setClickReverse] = useState(false);
 
   const decreaseIndex = () => {
@@ -225,7 +203,6 @@ function Sliders({ data, title }: ISlider) {
       setIndex((prev) => (prev === 0 ? maxIndex : prev - 1));
     }
   };
-
   const increaseIndex = () => {
     if (data) {
       if (leaving) return;
@@ -238,28 +215,16 @@ function Sliders({ data, title }: ISlider) {
       setIndex((prev) => (prev === maxIndex ? 0 : prev + 1));
     }
   };
-
   const toggleLeaving = () => setLeaving((prev) => !prev);
-  const onBoxClicked = (movie: number) => {
-    navigate(`/movies/${movie}`);
+  const onBoxClicked = (movieId: number, type: string) => {
+    navigate(`/movies/${type}/${movieId}`);
   };
-
   const onOverlayClick = () => navigate("/");
   const clickedMovie =
-    modalMovieMatch?.params.movieId &&
+    bigMovieMatch?.params.movieId &&
     data?.results.find(
-      (movie) => movie.id === +modalMovieMatch.params.movieId!
+      (movie) => movie.id + "" === bigMovieMatch.params.movieId
     );
-
-  const { data: actorData } = useQuery<IGetActorResult>(
-    ["actor", modalMovieMatch?.params.movieId],
-    () => getActor(+modalMovieMatch?.params.movieId!)
-  );
-
-  const { data: genreData } = useQuery<IGetGenreResult>(
-    ["genre", modalMovieMatch?.params.movieId],
-    () => getGenres(+modalMovieMatch?.params.movieId!)
-  );
 
   return (
     <>
@@ -271,12 +236,12 @@ function Sliders({ data, title }: ISlider) {
           custom={{ width, clickReverse }}
         >
           <Row
-            key={index}
             variants={rowVariants}
             initial="hidden"
             animate="visible"
             exit="exit"
             transition={{ type: "tween", duration: 1 }}
+            key={index}
             custom={{ width, clickReverse }}
           >
             {data?.results
@@ -284,12 +249,12 @@ function Sliders({ data, title }: ISlider) {
               .slice(offset * index, offset * index + offset)
               .map((movie) => (
                 <Box
-                  layoutId={movie.id + ""}
+                  layoutId={movie.id + type}
                   key={movie.id}
                   whileHover="hover"
                   initial="normal"
                   variants={boxVariants}
-                  onClick={() => onBoxClicked(movie.id)}
+                  onClick={() => onBoxClicked(movie.id, type)}
                   transition={{ type: "tween" }}
                   $bgPhoto={makeImagePath(
                     movie.backdrop_path || movie.poster_path,
@@ -323,7 +288,7 @@ function Sliders({ data, title }: ISlider) {
         </SliderBtn>
       </SliderRow>
       <AnimatePresence>
-        {modalMovieMatch ? (
+        {bigMovieMatch ? (
           <>
             <Overlay
               onClick={onOverlayClick}
@@ -332,9 +297,9 @@ function Sliders({ data, title }: ISlider) {
             />
             <BigMovie
               style={{ top: scrollY.get() + 100 }}
-              layoutId={modalMovieMatch.params.movieId}
+              layoutId={bigMovieMatch.params.movieId + type}
             >
-              {clickedMovie && actorData && genreData && (
+              {clickedMovie && (
                 <>
                   <BigCover
                     style={{
@@ -345,22 +310,10 @@ function Sliders({ data, title }: ISlider) {
                     }}
                   />
                   <BigTitle>{clickedMovie.title}</BigTitle>
-                  <BigRank>
-                    Rate: {clickedMovie.vote_average.toFixed(1)}/ 10.0
-                  </BigRank>
-                  <BigActor>
-                    Actor:
-                    {actorData.cast.slice(0, 3).map((data) => (
-                      <li key={actorData.id}>{"" + data.name + ","}</li>
-                    ))}
-                  </BigActor>
-                  <BigGenre>
-                    Genre:
-                    {genreData.genres.slice(0, 3).map((data) => (
-                      <li key={genreData.id}>{data.name + ","}</li>
-                    ))}
-                  </BigGenre>
-                  <BigOverview>{clickedMovie.overview}</BigOverview>
+                  <BigOverview>
+                    {clickedMovie.overview || "No Overview"}
+                  </BigOverview>
+                  <BigRank>{clickedMovie.vote_average}</BigRank>
                 </>
               )}
             </BigMovie>
@@ -370,4 +323,5 @@ function Sliders({ data, title }: ISlider) {
     </>
   );
 }
+
 export default Sliders;

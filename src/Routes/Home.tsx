@@ -1,15 +1,8 @@
 import { useQuery } from "react-query";
 import styled from "styled-components";
-import {
-  IGetMoviesResult,
-  getNowPlayingMovies,
-  getPopularMovies,
-  getTopRatedMovies,
-  // getTopRatedMovies,
-  // getUpcomingMovies,
-} from "../api";
-import { makeImagePath } from "../utils";
+import { getMovies, IGetMoviesResult } from "../api";
 import Sliders from "../Components/Sliders";
+import { makeImagePath } from "../utils";
 
 const Wrapper = styled.div`
   background-color: black;
@@ -37,36 +30,30 @@ const Title = styled.h2`
   font-size: 68px;
   margin-bottom: 20px;
 `;
-
 const Overview = styled.p`
   font-size: 30px;
   width: 50%;
 `;
 
 function Home() {
-  const { data: nowPlaying, isLoading } = useQuery<IGetMoviesResult>(
-    ["movies", "nowPlaying"],
-    getNowPlayingMovies
-  );
+  const { data: nowPlaying, isLoading: nowIsLoading } =
+    useQuery<IGetMoviesResult>("nowPlaying", () => getMovies("now_playing"));
 
-  // const { data: popular } = useQuery<IGetMoviesResult>(
-  //   ["moviesdsa", "popular"],
-  //   getPopularMovies
-  // );
+  // const { data: latest, isLoading: latestIsLoading } =
+  //   useQuery<IGetMoviesResult>("latest", () => getMovies("latest"));
 
-  // const { data: topRated } = useQuery<IGetMoviesResult>(
-  //   ["movies", "topRated"],
-  //   getTopRatedMovies
-  // );
+  const { data: topRated, isLoading: topRatedIsLoading } =
+    useQuery<IGetMoviesResult>("topRated", () => getMovies("top_rated"));
 
-  // const { data: upcomingMoviesList } = useQuery<IGetMoviesResult>(
-  //   ["movies", "upcoming"],
-  //   getUpcomingMovies
-  // );
+  const { data: upcoming, isLoading: upcomingIsLoading } =
+    useQuery<IGetMoviesResult>("upcoming", () => getMovies("upcoming"));
 
   return (
     <Wrapper>
-      {isLoading ? (
+      {nowIsLoading &&
+      // latestIsLoading &&
+      topRatedIsLoading &&
+      upcomingIsLoading ? (
         <Loader>Loading...</Loader>
       ) : (
         <>
@@ -77,15 +64,25 @@ function Home() {
             <Overview>{nowPlaying?.results[0].overview}</Overview>
           </Banner>
           <Sliders
-            data={nowPlaying as IGetMoviesResult}
+            type={"nowplaying"}
             title={"Now Playing"}
+            data={nowPlaying as IGetMoviesResult}
           />
-          {/* <Sliders data={popular as IGetMoviesResult} title={"Popular"} /> */}
-          {/* <Sliders data={topRated as IGetMoviesResult} title={"Top Rated"} /> */}
           {/* <Sliders
-            data={upcomingMoviesList as IGetMoviesResult}
-            title={"Upcoming"}
+            type={"latest"}
+            title={"Latest"}
+            data={latest as IGetMoviesResult}
           /> */}
+          <Sliders
+            type={"toprated"}
+            title={"Top Rated"}
+            data={topRated as IGetMoviesResult}
+          />
+          <Sliders
+            type={"upcoming"}
+            title={"Upcoming"}
+            data={upcoming as IGetMoviesResult}
+          />
         </>
       )}
     </Wrapper>

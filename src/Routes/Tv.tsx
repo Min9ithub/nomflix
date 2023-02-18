@@ -1,12 +1,7 @@
 import { useQuery } from "react-query";
 import styled from "styled-components";
-import {
-  getOnTheAirTv,
-  getPopularTv,
-  getTopRatedTv,
-  IGetTvResult,
-} from "../api";
-import SliderTvs from "../Components/SliderTvs";
+import { getTv, IGetTvResult } from "../api";
+import SlidersTv from "../Components/SlidersTv";
 import { makeImagePath } from "../utils";
 
 const Wrapper = styled.div`
@@ -41,46 +36,51 @@ const Overview = styled.p`
 `;
 
 function Tv() {
-  const { data: ontheairTvList, isLoading } = useQuery<IGetTvResult>(
-    ["tv", "on the air"],
-    getOnTheAirTv
+  const { data: latest, isLoading: latestIsLoading } = useQuery<IGetTvResult>(
+    "latest",
+    () => getTv("latest")
   );
 
-  const { data: popularTvList } = useQuery<IGetTvResult>(
-    ["popularTv", "popularTv"],
-    getPopularTv
+  const { data: airing, isLoading: airingIsLoading } = useQuery<IGetTvResult>(
+    "airing",
+    () => getTv("airing_today")
   );
 
-  const { data: topRatedTvList } = useQuery<IGetTvResult>(
-    ["topRatedtv", "topRatedtv"],
-    getTopRatedTv
+  const { data: popular, isLoading: popularIsLoading } = useQuery<IGetTvResult>(
+    "popular",
+    () => getTv("popular")
   );
+
+  const { data: toprated, isLoading: topratedIsLoading } =
+    useQuery<IGetTvResult>("toprated", () => getTv("top_rated"));
 
   return (
     <Wrapper>
-      {isLoading ? (
+      {airingIsLoading && popularIsLoading && topratedIsLoading ? (
         <Loader>Loading...</Loader>
       ) : (
         <>
           <Banner
-            bgPhoto={makeImagePath(
-              ontheairTvList?.results[0].backdrop_path ||
-                ontheairTvList?.results[0].poster_path ||
-                ""
-            )}
+            bgPhoto={makeImagePath(airing?.results[0].backdrop_path || "")}
           >
-            <Title>{ontheairTvList?.results[0].name}</Title>
-            <Overview>{ontheairTvList?.results[0].overview}</Overview>
+            <Title>{airing?.results[0].name}</Title>
+            <Overview>{airing?.results[0].overview}</Overview>
           </Banner>
-          <SliderTvs
-            data={ontheairTvList as IGetTvResult}
-            title={"On The Air"}
+          <SlidersTv
+            type="airing"
+            title="Airing Today"
+            data={airing as IGetTvResult}
           />
-          {/* <SliderTvs data={popularTvList as IGetTvResult} title={"Popular"} />
-          <SliderTvs
-            data={topRatedTvList as IGetTvResult}
-            title={"Top Rated"}
-          /> */}
+          <SlidersTv
+            type="popular"
+            title="Popular"
+            data={popular as IGetTvResult}
+          />
+          <SlidersTv
+            type="toprated"
+            title="Top Rated"
+            data={toprated as IGetTvResult}
+          />
         </>
       )}
     </Wrapper>

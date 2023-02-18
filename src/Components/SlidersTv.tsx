@@ -5,16 +5,18 @@ import styled from "styled-components";
 import { IGetTvResult } from "../api";
 import { makeImagePath, useWindowDimensions } from "../utils";
 
-const SliderRow = styled.div`
+const SliderRow = styled(motion.div)`
   position: relative;
   height: 200px;
   top: -100px;
   margin-bottom: 80px;
 `;
 
-const Title = styled.div`
+const Title = styled.h2`
+  position: absolute;
   font-size: 30px;
-  margin-bottom: 10px;
+  top: -50px;
+  margin-left: 10px;
 `;
 
 const Row = styled(motion.div)`
@@ -25,9 +27,9 @@ const Row = styled(motion.div)`
   width: 100%;
 `;
 
-const Box = styled(motion.div)<{ bgPhoto: string }>`
+const Box = styled(motion.div)<{ $bgPhoto: string }>`
   background-color: white;
-  background-image: url(${(props) => props.bgPhoto});
+  background-image: url(${(props) => props.$bgPhoto});
   background-size: cover;
   background-position: center center;
   height: 200px;
@@ -38,26 +40,6 @@ const Box = styled(motion.div)<{ bgPhoto: string }>`
   }
   &:last-child {
     transform-origin: center right;
-  }
-`;
-
-const SliderBtn = styled(motion.div)<{ isRight: boolean }>`
-  position: absolute;
-  right: ${(props) => (props.isRight ? 0 : null)};
-  left: ${(props) => (props.isRight ? null : 0)};
-  background-color: rgba(0, 0, 0, 0.5);
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 100%;
-  width: 40px;
-  border: none;
-  z-index: 2;
-  color: ${(props) => props.theme.white.darker};
-  svg {
-    width: 40px;
-    height: 40px;
   }
 `;
 
@@ -93,6 +75,7 @@ const BigTv = styled(motion.div)`
   border-radius: 15px;
   overflow: hidden;
   background-color: ${(props) => props.theme.black.lighter};
+  z-index: 2;
 `;
 
 const BigCover = styled.div`
@@ -117,29 +100,31 @@ const BigOverview = styled.p`
   color: ${(props) => props.theme.white.lighter};
 `;
 
-const rowVariants = {
-  hidden: ({
-    width,
-    clickReverse,
-  }: {
-    width: number;
-    clickReverse: boolean;
-  }) => ({
-    x: clickReverse ? -width - 5 : width + 5,
-  }),
-  visible: {
-    x: 0,
-  },
-  exit: ({
-    width,
-    clickReverse,
-  }: {
-    width: number;
-    clickReverse: boolean;
-  }) => ({
-    x: clickReverse ? width + 5 : -width - 5,
-  }),
-};
+// const rowVariants: Variants = {
+//   hidden: ({
+//     width,
+//     clickReverse,
+//   }: {
+//     width: number;
+//     clickReverse: boolean;
+//   }) => ({
+//     x: clickReverse ? -width - 5 : width + 5,
+//   }),
+
+//   visible: {
+//     x: 0,
+//   },
+
+//   exit: ({
+//     width,
+//     clickReverse,
+//   }: {
+//     width: number;
+//     clickReverse: boolean;
+//   }) => ({
+//     x: clickReverse ? width + 5 : -width - 5,
+//   }),
+// };
 
 const boxVariants: Variants = {
   normal: {
@@ -167,20 +152,41 @@ const infoVariants: Variants = {
   },
 };
 
-const offset = 6;
+const SliderBtn = styled.div<{ isRight: boolean }>`
+  position: absolute;
+  right: ${(props) => (props.isRight ? 0 : null)};
+  left: ${(props) => (props.isRight ? null : 0)};
+  background-color: rgba(0, 0, 0, 0.5);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  width: 40px;
+  border: none;
+  z-index: 2;
+  color: ${(props) => props.theme.white.darker};
+  svg {
+    width: 40px;
+    height: 40px;
+  }
+`;
 
 interface ISlider {
-  data: IGetTvResult;
+  type: string;
   title: string;
+  data: IGetTvResult;
 }
 
-function SliderTvs({ data, title }: ISlider) {
+function SlidersTv({ type, title, data }: ISlider) {
   const width = useWindowDimensions();
   const navigate = useNavigate();
-  const bigTvMatch: PathMatch<string> | null = useMatch("/tv/:tvId");
+  const bigTvMatch: PathMatch<string> | null = useMatch(`/tv/${type}/:tvId`);
   const { scrollY } = useScroll();
+  const offset = 6;
   const [index, setIndex] = useState(0);
   const [leaving, setLeaving] = useState(false);
+
   const [clickReverse, setClickReverse] = useState(false);
 
   const decreaseIndex = () => {
@@ -189,31 +195,28 @@ function SliderTvs({ data, title }: ISlider) {
       setClickReverse(true);
       toggleLeaving();
       // banner에 있는 영화 하나 빼기
-      const totalMovies = data.results.length - 1;
+      const totalTvs = data.results.length - 1;
       // 1) index도 마찬가지, 2) 올림이나 내림을 해줌
-      const maxIndex = Math.floor(totalMovies / offset) - 1;
+      const maxIndex = Math.floor(totalTvs / offset) - 1;
       setIndex((prev) => (prev === 0 ? maxIndex : prev - 1));
     }
   };
-
   const increaseIndex = () => {
     if (data) {
       if (leaving) return;
       setClickReverse(false);
       toggleLeaving();
       // banner에 있는 영화 하나 빼기
-      const totalMovies = data.results.length - 1;
+      const totalTvs = data.results.length - 1;
       // 1) index도 마찬가지, 2) 올림이나 내림을 해줌
-      const maxIndex = Math.floor(totalMovies / offset) - 1;
+      const maxIndex = Math.floor(totalTvs / offset) - 1;
       setIndex((prev) => (prev === maxIndex ? 0 : prev + 1));
     }
   };
-
   const toggleLeaving = () => setLeaving((prev) => !prev);
-  const onBoxClicked = (tv: number) => {
-    navigate(`/tv/${tv}`);
+  const onBoxClicked = (tvId: number, type: string) => {
+    navigate(`/tv/${type}/${tvId}`);
   };
-
   const onOverlayClick = () => navigate("/tv");
   const clickedTv =
     bigTvMatch?.params.tvId &&
@@ -226,30 +229,29 @@ function SliderTvs({ data, title }: ISlider) {
         <AnimatePresence
           initial={false}
           onExitComplete={toggleLeaving}
-          custom={{ width, clickReverse }}
+          custom={{ clickReverse }}
         >
           <Row
-            key={index}
-            variants={rowVariants}
-            initial="hidden"
-            animate="visible"
-            exit="exit"
+            initial={{ x: clickReverse ? -width - 10 : width + 10 }}
+            animate={{ x: 0 }}
+            exit={{ x: clickReverse ? width + 10 : -width - 10 }}
             transition={{ type: "tween", duration: 1 }}
-            custom={{ width, clickReverse }}
+            key={index}
+            custom={{ clickReverse }}
           >
             {data?.results
               .slice(1)
               .slice(offset * index, offset * index + offset)
               .map((tv) => (
                 <Box
-                  layoutId={tv.id + ""}
+                  layoutId={tv.id + type}
                   key={tv.id}
                   whileHover="hover"
                   initial="normal"
                   variants={boxVariants}
-                  onClick={() => onBoxClicked(tv.id)}
+                  onClick={() => onBoxClicked(tv.id, type)}
                   transition={{ type: "tween" }}
-                  bgPhoto={makeImagePath(
+                  $bgPhoto={makeImagePath(
                     tv.backdrop_path || tv.poster_path,
                     "w500"
                   )}
@@ -280,7 +282,6 @@ function SliderTvs({ data, title }: ISlider) {
           </svg>
         </SliderBtn>
       </SliderRow>
-
       <AnimatePresence>
         {bigTvMatch ? (
           <>
@@ -291,20 +292,22 @@ function SliderTvs({ data, title }: ISlider) {
             />
             <BigTv
               style={{ top: scrollY.get() + 100 }}
-              layoutId={bigTvMatch.params.tvId}
+              layoutId={bigTvMatch.params.tvId + type}
             >
               {clickedTv && (
                 <>
                   <BigCover
                     style={{
                       backgroundImage: `linear-gradient(to top, black, transparent), url(${makeImagePath(
-                        clickedTv.backdrop_path || clickedTv.poster_path,
+                        clickedTv.backdrop_path,
                         "w500"
                       )})`,
                     }}
                   />
                   <BigTitle>{clickedTv.name}</BigTitle>
-                  <BigOverview>{clickedTv.overview}</BigOverview>
+                  <BigOverview>
+                    {clickedTv.overview || "No Overview"}
+                  </BigOverview>
                 </>
               )}
             </BigTv>
@@ -315,4 +318,4 @@ function SliderTvs({ data, title }: ISlider) {
   );
 }
 
-export default SliderTvs;
+export default SlidersTv;
