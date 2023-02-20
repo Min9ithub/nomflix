@@ -1,5 +1,5 @@
 const API_KEY = "1b88530c8ac350029276f29845306e48";
-const BASE_PATH = "https://api.themoviedb.org/3/";
+const BASE_PATH = "https://api.themoviedb.org/3";
 
 interface IMovie {
   id: number;
@@ -8,6 +8,7 @@ interface IMovie {
   title: string;
   overview: string;
   vote_average: string;
+  release_date: string;
 }
 
 export interface IGetMoviesResult {
@@ -21,8 +22,37 @@ export interface IGetMoviesResult {
   total_results: number;
 }
 
+export interface IGetMoviesDetailResult {
+  genres: {
+    id: number;
+    name: string;
+  }[];
+}
+
+export interface IGetMoviesActorResult {
+  cast: {
+    id: number;
+    name: string;
+  }[];
+  crew: {
+    name: string;
+  }[];
+}
+
 export function getMovies(type: string) {
-  return fetch(`${BASE_PATH}/movie/${type}/?api_key=${API_KEY}`).then(
+  return fetch(`${BASE_PATH}/movie/${type}?api_key=${API_KEY}`).then(
+    (response) => response.json()
+  );
+}
+
+export function getMoviesDetail(id: number) {
+  return fetch(`${BASE_PATH}/movie/${id}?api_key=${API_KEY}`).then((response) =>
+    response.json()
+  );
+}
+
+export function getMoviesActor(id: number) {
+  return fetch(`${BASE_PATH}/movie/${id}/credits?api_key=${API_KEY}`).then(
     (response) => response.json()
   );
 }
@@ -66,5 +96,17 @@ export interface IGetSearchResult {
 export function getSearch(keyword: string | null) {
   return fetch(
     `${BASE_PATH}/search/multi?api_key=${API_KEY}&query=${keyword}`
+  ).then((response) => response.json());
+}
+
+export function getMovieSearch(keyword: string | null) {
+  return fetch(
+    `${BASE_PATH}/search/movie?api_key=${API_KEY}&query=${keyword}`
+  ).then((response) => response.json());
+}
+
+export function getTvSearch(keyword: string | null) {
+  return fetch(
+    `${BASE_PATH}/search/tv?api_key=${API_KEY}&query=${keyword}`
   ).then((response) => response.json());
 }
