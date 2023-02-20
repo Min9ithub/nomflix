@@ -56,8 +56,8 @@ table {
 
 
 body{
-  font-weight: 300;
-  font-family: 'Source Sans Pro', sans-serif;
+  font-weight: 400;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
   color: ${(props) => props.theme.white.darker};
   background-color: black;
   line-height: 1.2;
