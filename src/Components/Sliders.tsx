@@ -50,11 +50,12 @@ const Box = styled(motion.div)<{ $bgPhoto: string }>`
 `;
 
 const Info = styled(motion.div)`
+  width: 100%;
   padding: 10px;
   background-color: ${(props) => props.theme.black.lighter};
+  border-radius: 0px 0px 15px 15px;
   opacity: 0;
   position: absolute;
-  width: 100%;
   bottom: 0;
   h4 {
     text-align: center;
@@ -92,10 +93,10 @@ const Overlay = styled(motion.div)`
   z-index: 3;
 `;
 
-const BigMovie = styled(motion.div)`
+const ModalMovie = styled(motion.div)`
   position: absolute;
   width: 40vw;
-  height: 80vh;
+  height: 70vh;
   left: 0;
   right: 0;
   margin: 0 auto;
@@ -105,50 +106,57 @@ const BigMovie = styled(motion.div)`
   ::-webkit-scrollbar {
     display: none;
   }
-  background-color: ${(props) => props.theme.black.lighter};
+  background-color: ${(props) => props.theme.black.darker};
   z-index: 3;
 `;
 
-const BigCover = styled.div`
+const ModalCover = styled.div`
   width: 100%;
   height: 400px;
   background-size: cover;
   background-position: center center;
 `;
 
-const BigTitle = styled.h3`
+const ModalTitle = styled.h3`
+  font-weight: 600;
   color: ${(props) => props.theme.white.lighter};
   font-size: 46px;
   position: relative;
-  top: -80px;
-  padding: 10px 20px;
+  top: -60px;
+  padding-left: 20px;
 `;
 
-const BigOverview = styled.p`
-  position: relative;
-  top: -80px;
+const ModalInfo = styled.div`
+  display: grid;
+  grid-template-columns: 2fr 1fr;
   color: ${(props) => props.theme.white.lighter};
-  padding: 10px;
 `;
 
-const BigRank = styled.p`
-  position: relative;
-  top: -80px;
+const ModalInfoOne = styled.div`
+  padding-left: 20px;
+  font-size: 25px;
+  font-weight: 500;
 `;
 
-const BigDate = styled.p`
-  position: relative;
-  top: -80px;
+const ModalDate = styled.span`
+  margin-right: 10px;
+`;
+const ModalRank = styled.span`
+  color: ${(props) => props.theme.red};
 `;
 
-const BigGenres = styled.p`
-  position: relative;
-  top: -80px;
+const ModalInfoTwo = styled.div`
+  padding: 0px 20px;
 `;
 
-const BigActor = styled.p`
-  position: relative;
-  top: -80px;
+const ModalGenres = styled.p`
+  margin-bottom: 10px;
+`;
+
+const ModalActor = styled.p``;
+
+const ModalOverview = styled.p`
+  padding-left: 10px;
 `;
 
 const rowVariants: Variants = {
@@ -333,41 +341,47 @@ function Sliders({ type, title, data }: ISlider) {
               exit={{ opacity: 0 }}
               animate={{ opacity: 1 }}
             />
-            <BigMovie
-              style={{ top: scrollY.get() + 100 }}
+            <ModalMovie
+              style={{ top: scrollY.get() + 150 }}
               layoutId={bigMovieMatch.params.movieId + type}
             >
               {clickedMovie && (
                 <>
-                  <BigCover
+                  <ModalCover
                     style={{
-                      backgroundImage: `linear-gradient(to top, black, transparent), url(${makeImagePath(
+                      backgroundImage: `linear-gradient(to top, rgba(0,0,0,0.8), transparent), url(${makeImagePath(
                         clickedMovie.backdrop_path,
-                        "w500"
+                        "original"
                       )})`,
                     }}
                   />
-                  <BigTitle>{clickedMovie.title}</BigTitle>
-                  <BigOverview>
-                    {clickedMovie.overview || "No Overview"}
-                  </BigOverview>
-                  <BigRank>{clickedMovie.vote_average}</BigRank>
-                  <BigDate>{clickedMovie.release_date}</BigDate>
-
-                  <BigGenres>
-                    {moviesDetailData?.genres.map((data) => (
-                      <span key={data.id}>{data.name}</span>
-                    ))}
-                  </BigGenres>
-
-                  <BigActor>
-                    {moviesActorData?.cast.slice(0, 3).map((data) => (
-                      <span key={data.id}>{data.name}</span>
-                    ))}
-                  </BigActor>
+                  <ModalTitle>{clickedMovie.title}</ModalTitle>
+                  <ModalInfo>
+                    <ModalInfoOne>
+                      <ModalDate>
+                        {clickedMovie.release_date.slice(0, 4)}
+                      </ModalDate>
+                      <ModalRank>{clickedMovie.vote_average}</ModalRank>
+                    </ModalInfoOne>
+                    <ModalInfoTwo>
+                      <ModalGenres>
+                        <span>Genres: </span>
+                        {moviesDetailData?.genres.slice(0, 3).map((data) => (
+                          <span key={data.id}>{data.name} </span>
+                        ))}
+                      </ModalGenres>
+                      <ModalActor>
+                        <span>Actors: </span>
+                        {moviesActorData?.cast.slice(0, 3).map((data) => (
+                          <span key={data.id}>{data.name} </span>
+                        ))}
+                      </ModalActor>
+                    </ModalInfoTwo>
+                    <ModalOverview>{clickedMovie.overview}</ModalOverview>
+                  </ModalInfo>
                 </>
               )}
-            </BigMovie>
+            </ModalMovie>
           </>
         ) : null}
       </AnimatePresence>
