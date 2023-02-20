@@ -1,8 +1,15 @@
 import { AnimatePresence, motion, useScroll, Variants } from "framer-motion";
 import { useState } from "react";
-import { PathMatch, useMatch, useNavigate } from "react-router-dom";
+import { useQuery } from "react-query";
+import { useMatch, useNavigate } from "react-router-dom";
 import styled from "styled-components";
-import { IGetTvResult } from "../api";
+import {
+  getTvActor,
+  getTvDetail,
+  IGetTvActorResult,
+  IGetTvDetailResult,
+  IGetTvResult,
+} from "../api";
 import { makeImagePath, useWindowDimensions } from "../utils";
 
 const SliderRow = styled(motion.div)`
@@ -28,12 +35,11 @@ const Row = styled(motion.div)`
 `;
 
 const Box = styled(motion.div)<{ $bgPhoto: string }>`
-  background-color: white;
   background-image: url(${(props) => props.$bgPhoto});
   background-size: cover;
   background-position: center center;
+  border-radius: 15px;
   height: 200px;
-  font-size: 66px;
   cursor: pointer;
   &:first-child {
     transform-origin: center left;
@@ -44,113 +50,18 @@ const Box = styled(motion.div)<{ $bgPhoto: string }>`
 `;
 
 const Info = styled(motion.div)`
+  width: 100%;
   padding: 10px;
   background-color: ${(props) => props.theme.black.lighter};
+  border-radius: 0px 0px 15px 15px;
   opacity: 0;
   position: absolute;
-  width: 100%;
   bottom: 0;
   h4 {
     text-align: center;
     font-size: 18px;
   }
 `;
-
-const Overlay = styled(motion.div)`
-  position: fixed;
-  top: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
-  opacity: 0;
-`;
-
-const BigTv = styled(motion.div)`
-  position: absolute;
-  width: 40vw;
-  height: 80vh;
-  left: 0;
-  right: 0;
-  margin: 0 auto;
-  border-radius: 15px;
-  overflow: hidden;
-  background-color: ${(props) => props.theme.black.lighter};
-  z-index: 2;
-`;
-
-const BigCover = styled.div`
-  width: 100%;
-  height: 400px;
-  background-size: cover;
-  background-position: center center;
-`;
-
-const BigTitle = styled.h3`
-  color: ${(props) => props.theme.white.lighter};
-  padding: 20px;
-  font-size: 46px;
-  position: relative;
-  top: -80px;
-`;
-
-const BigOverview = styled.p`
-  padding: 20px;
-  position: relative;
-  top: -80px;
-  color: ${(props) => props.theme.white.lighter};
-`;
-
-// const rowVariants: Variants = {
-//   hidden: ({
-//     width,
-//     clickReverse,
-//   }: {
-//     width: number;
-//     clickReverse: boolean;
-//   }) => ({
-//     x: clickReverse ? -width - 5 : width + 5,
-//   }),
-
-//   visible: {
-//     x: 0,
-//   },
-
-//   exit: ({
-//     width,
-//     clickReverse,
-//   }: {
-//     width: number;
-//     clickReverse: boolean;
-//   }) => ({
-//     x: clickReverse ? width + 5 : -width - 5,
-//   }),
-// };
-
-const boxVariants: Variants = {
-  normal: {
-    scale: 1,
-  },
-  hover: {
-    scale: 1.3,
-    y: -50,
-    transition: {
-      delay: 0.5,
-      duration: 0.3,
-      type: "tween",
-    },
-  },
-};
-
-const infoVariants: Variants = {
-  hover: {
-    opacity: 1,
-    transition: {
-      delay: 0.5,
-      duration: 0.3,
-      type: "tween",
-    },
-  },
-};
 
 const SliderBtn = styled.div<{ isRight: boolean }>`
   position: absolute;
@@ -172,6 +83,134 @@ const SliderBtn = styled.div<{ isRight: boolean }>`
   }
 `;
 
+const Overlay = styled(motion.div)`
+  position: fixed;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  opacity: 0;
+  z-index: 3;
+`;
+
+const ModalTv = styled(motion.div)`
+  position: absolute;
+  width: 40vw;
+  height: 70vh;
+  left: 0;
+  right: 0;
+  margin: 0 auto;
+  border-radius: 15px;
+  overflow: hidden;
+  overflow-y: scroll;
+  ::-webkit-scrollbar {
+    display: none;
+  }
+  background-color: ${(props) => props.theme.black.lighter};
+  z-index: 3;
+`;
+
+const ModalCover = styled.div`
+  width: 100%;
+  height: 400px;
+  background-size: cover;
+  background-position: center center;
+`;
+
+const ModalTitle = styled.h3`
+  font-weight: 600;
+  color: ${(props) => props.theme.white.lighter};
+  font-size: 46px;
+  position: relative;
+  top: -60px;
+  padding-left: 20px;
+`;
+
+const ModalInfo = styled.div`
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  color: ${(props) => props.theme.white.lighter};
+`;
+
+const ModalInfoOne = styled.div`
+  padding-left: 20px;
+  font-size: 25px;
+  font-weight: 500;
+`;
+
+const ModalDate = styled.span`
+  margin-right: 10px;
+`;
+const ModalRank = styled.span`
+  color: ${(props) => props.theme.red};
+`;
+
+const ModalInfoTwo = styled.div`
+  padding: 0px 20px;
+`;
+
+const ModalGenres = styled.p`
+  margin-bottom: 10px;
+`;
+
+const ModalActor = styled.p``;
+
+const ModalOverview = styled.p`
+  padding-left: 10px;
+`;
+
+const rowVariants: Variants = {
+  hidden: ({
+    width,
+    clickReverse,
+  }: {
+    width: number;
+    clickReverse: boolean;
+  }) => ({
+    x: clickReverse ? -width - 5 : width + 5,
+  }),
+
+  visible: {
+    x: 0,
+  },
+
+  exit: ({
+    width,
+    clickReverse,
+  }: {
+    width: number;
+    clickReverse: boolean;
+  }) => ({
+    x: clickReverse ? width + 5 : -width - 5,
+  }),
+};
+
+const boxVariants: Variants = {
+  normal: {
+    scale: 1,
+  },
+  hover: {
+    scale: 1.3,
+    y: -50,
+    transition: {
+      delay: 0.5,
+      duration: 0.3,
+      type: "tween",
+    },
+  },
+};
+
+const infoVariants: Variants = {
+  hover: {
+    opacity: 1,
+    transition: {
+      delay: 0.7,
+      duration: 0.3,
+      type: "tween",
+    },
+  },
+};
+
 interface ISlider {
   type: string;
   title: string;
@@ -181,13 +220,22 @@ interface ISlider {
 function SlidersTv({ type, title, data }: ISlider) {
   const width = useWindowDimensions();
   const navigate = useNavigate();
-  const bigTvMatch: PathMatch<string> | null = useMatch(`/tv/${type}/:tvId`);
+  const bigTvMatch = useMatch(`/tv/${type}/:tvId`);
   const { scrollY } = useScroll();
   const offset = 6;
   const [index, setIndex] = useState(0);
   const [leaving, setLeaving] = useState(false);
-
   const [clickReverse, setClickReverse] = useState(false);
+
+  const { data: tvDetailData } = useQuery<IGetTvDetailResult>(
+    [bigTvMatch?.params.tvId, "TvDetail"],
+    () => getTvDetail(+bigTvMatch?.params.tvId!)
+  );
+
+  const { data: tvActorData } = useQuery<IGetTvActorResult>(
+    [bigTvMatch?.params.tvId, "TvActor"],
+    () => getTvActor(+bigTvMatch?.params.tvId!)
+  );
 
   const decreaseIndex = () => {
     if (data) {
@@ -229,15 +277,16 @@ function SlidersTv({ type, title, data }: ISlider) {
         <AnimatePresence
           initial={false}
           onExitComplete={toggleLeaving}
-          custom={{ clickReverse }}
+          custom={{ width, clickReverse }}
         >
           <Row
-            initial={{ x: clickReverse ? -width - 10 : width + 10 }}
-            animate={{ x: 0 }}
-            exit={{ x: clickReverse ? width + 10 : -width - 10 }}
+            variants={rowVariants}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
             transition={{ type: "tween", duration: 1 }}
             key={index}
-            custom={{ clickReverse }}
+            custom={{ width, clickReverse }}
           >
             {data?.results
               .slice(1)
@@ -290,27 +339,49 @@ function SlidersTv({ type, title, data }: ISlider) {
               exit={{ opacity: 0 }}
               animate={{ opacity: 1 }}
             />
-            <BigTv
-              style={{ top: scrollY.get() + 100 }}
+            <ModalTv
+              style={{ top: scrollY.get() + 150 }}
               layoutId={bigTvMatch.params.tvId + type}
             >
               {clickedTv && (
                 <>
-                  <BigCover
+                  <ModalCover
                     style={{
                       backgroundImage: `linear-gradient(to top, black, transparent), url(${makeImagePath(
                         clickedTv.backdrop_path,
-                        "w500"
+                        "original"
                       )})`,
                     }}
                   />
-                  <BigTitle>{clickedTv.name}</BigTitle>
-                  <BigOverview>
-                    {clickedTv.overview || "No Overview"}
-                  </BigOverview>
+                  <ModalTitle>{clickedTv.name}</ModalTitle>
+                  <ModalInfo>
+                    <ModalInfoOne>
+                      <ModalDate>
+                        {clickedTv.first_air_date.slice(0, 4)}
+                      </ModalDate>
+                      <ModalRank>{clickedTv.vote_average}</ModalRank>
+                    </ModalInfoOne>
+                    <ModalInfoTwo>
+                      <ModalGenres>
+                        <span>Genres: </span>
+                        {tvDetailData?.genres.slice(0, 3).map((data) => (
+                          <span key={data.id}>{data.name} </span>
+                        ))}
+                      </ModalGenres>
+                      <ModalActor>
+                        <span>Actors: </span>
+                        {tvActorData?.cast.slice(0, 3).map((data) => (
+                          <span key={data.id}>{data.name} </span>
+                        ))}
+                      </ModalActor>
+                    </ModalInfoTwo>
+                    <ModalOverview>
+                      {clickedTv.overview || "No Overview"}
+                    </ModalOverview>
+                  </ModalInfo>
                 </>
               )}
-            </BigTv>
+            </ModalTv>
           </>
         ) : null}
       </AnimatePresence>
