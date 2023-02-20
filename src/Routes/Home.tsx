@@ -1,3 +1,4 @@
+import { Helmet } from "react-helmet";
 import { useQuery } from "react-query";
 import styled from "styled-components";
 import { getMovies, IGetMoviesResult } from "../api";
@@ -36,56 +37,63 @@ const Overview = styled.p`
 `;
 
 function Home() {
-  const { data: nowPlaying, isLoading: nowIsLoading } =
+  const { data: nowPlayingData, isLoading: loadingNowPlaying } =
     useQuery<IGetMoviesResult>("nowPlaying", () => getMovies("now_playing"));
 
-  // const { data: latest, isLoading: latestIsLoading } =
-  //   useQuery<IGetMoviesResult>("latest", () => getMovies("latest"));
-
-  const { data: topRated, isLoading: topRatedIsLoading } =
+  const { data: topRatedData, isLoading: loadingTopRated } =
     useQuery<IGetMoviesResult>("topRated", () => getMovies("top_rated"));
 
-  const { data: upcoming, isLoading: upcomingIsLoading } =
+  const { data: upcomingData, isLoading: loadingUpcoming } =
     useQuery<IGetMoviesResult>("upcoming", () => getMovies("upcoming"));
 
+  const { data: popularData, isLoading: loadingPopular } =
+    useQuery<IGetMoviesResult>("popular", () => getMovies("popular"));
+
   return (
-    <Wrapper>
-      {nowIsLoading &&
-      // latestIsLoading &&
-      topRatedIsLoading &&
-      upcomingIsLoading ? (
-        <Loader>Loading...</Loader>
-      ) : (
-        <>
-          <Banner
-            bgPhoto={makeImagePath(nowPlaying?.results[0].backdrop_path || "")}
-          >
-            <Title>{nowPlaying?.results[0].title}</Title>
-            <Overview>{nowPlaying?.results[0].overview}</Overview>
-          </Banner>
-          <Sliders
-            type={"nowplaying"}
-            title={"Now Playing"}
-            data={nowPlaying as IGetMoviesResult}
-          />
-          {/* <Sliders
-            type={"latest"}
-            title={"Latest"}
-            data={latest as IGetMoviesResult}
-          /> */}
-          <Sliders
-            type={"toprated"}
-            title={"Top Rated"}
-            data={topRated as IGetMoviesResult}
-          />
-          <Sliders
-            type={"upcoming"}
-            title={"Upcoming"}
-            data={upcoming as IGetMoviesResult}
-          />
-        </>
-      )}
-    </Wrapper>
+    <>
+      <Helmet>
+        <title>Home</title>
+      </Helmet>
+      <Wrapper>
+        {loadingNowPlaying &&
+        loadingTopRated &&
+        loadingUpcoming &&
+        loadingPopular ? (
+          <Loader>Loading...</Loader>
+        ) : (
+          <>
+            <Banner
+              bgPhoto={makeImagePath(
+                nowPlayingData?.results[0].backdrop_path || ""
+              )}
+            >
+              <Title>{nowPlayingData?.results[0].title}</Title>
+              <Overview>{nowPlayingData?.results[0].overview}</Overview>
+            </Banner>
+            <Sliders
+              type={"nowplaying"}
+              title={"Now Playing"}
+              data={nowPlayingData as IGetMoviesResult}
+            />
+            <Sliders
+              type={"toprated"}
+              title={"Top Rated"}
+              data={topRatedData as IGetMoviesResult}
+            />
+            <Sliders
+              type={"upcoming"}
+              title={"Upcoming"}
+              data={upcomingData as IGetMoviesResult}
+            />
+            <Sliders
+              type={"popular"}
+              title={"Popular"}
+              data={popularData as IGetMoviesResult}
+            />
+          </>
+        )}
+      </Wrapper>
+    </>
   );
 }
 

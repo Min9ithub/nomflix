@@ -1,3 +1,4 @@
+import { Helmet } from "react-helmet";
 import { useQuery } from "react-query";
 import styled from "styled-components";
 import { getTv, IGetTvResult } from "../api";
@@ -36,54 +37,63 @@ const Overview = styled.p`
 `;
 
 function Tv() {
-  const { data: latest, isLoading: latestIsLoading } = useQuery<IGetTvResult>(
-    "latest",
-    () => getTv("latest")
-  );
+  const { data: onTheAirData, isLoading: loadingOnTheAir } =
+    useQuery<IGetTvResult>("onTheAir", () => getTv("on_the_air"));
 
-  const { data: airing, isLoading: airingIsLoading } = useQuery<IGetTvResult>(
-    "airing",
-    () => getTv("airing_today")
-  );
+  const { data: airingTodayData, isLoading: loadingAiringToday } =
+    useQuery<IGetTvResult>("airingToday", () => getTv("airing_today"));
 
-  const { data: popular, isLoading: popularIsLoading } = useQuery<IGetTvResult>(
-    "popular",
-    () => getTv("popular")
-  );
+  const { data: popularData, isLoading: loadingPopular } =
+    useQuery<IGetTvResult>("popular", () => getTv("popular"));
 
-  const { data: toprated, isLoading: topratedIsLoading } =
-    useQuery<IGetTvResult>("toprated", () => getTv("top_rated"));
+  const { data: topRatedData, isLoading: loadingTopRated } =
+    useQuery<IGetTvResult>("topRated", () => getTv("top_rated"));
 
   return (
-    <Wrapper>
-      {airingIsLoading && popularIsLoading && topratedIsLoading ? (
-        <Loader>Loading...</Loader>
-      ) : (
-        <>
-          <Banner
-            bgPhoto={makeImagePath(airing?.results[0].backdrop_path || "")}
-          >
-            <Title>{airing?.results[0].name}</Title>
-            <Overview>{airing?.results[0].overview}</Overview>
-          </Banner>
-          <SlidersTv
-            type="airing"
-            title="Airing Today"
-            data={airing as IGetTvResult}
-          />
-          <SlidersTv
-            type="popular"
-            title="Popular"
-            data={popular as IGetTvResult}
-          />
-          <SlidersTv
-            type="toprated"
-            title="Top Rated"
-            data={toprated as IGetTvResult}
-          />
-        </>
-      )}
-    </Wrapper>
+    <>
+      <Helmet>
+        <title>Tv Shows</title>
+      </Helmet>
+      <Wrapper>
+        {loadingOnTheAir &&
+        loadingAiringToday &&
+        loadingPopular &&
+        loadingTopRated ? (
+          <Loader>Loading...</Loader>
+        ) : (
+          <>
+            <Banner
+              bgPhoto={makeImagePath(
+                onTheAirData?.results[0].backdrop_path || ""
+              )}
+            >
+              <Title>{onTheAirData?.results[0].name}</Title>
+              <Overview>{onTheAirData?.results[0].overview}</Overview>
+            </Banner>
+            <SlidersTv
+              type="on_the_air"
+              title="On The Air"
+              data={onTheAirData as IGetTvResult}
+            />
+            <SlidersTv
+              type="airing_today"
+              title="Airing Today"
+              data={airingTodayData as IGetTvResult}
+            />
+            <SlidersTv
+              type="popular"
+              title="Popular"
+              data={popularData as IGetTvResult}
+            />
+            <SlidersTv
+              type="top_rated"
+              title="Top Rated"
+              data={topRatedData as IGetTvResult}
+            />
+          </>
+        )}
+      </Wrapper>
+    </>
   );
 }
 

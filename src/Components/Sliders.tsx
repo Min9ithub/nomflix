@@ -1,8 +1,15 @@
 import { AnimatePresence, motion, useScroll, Variants } from "framer-motion";
 import { useState } from "react";
-import { PathMatch, useMatch, useNavigate } from "react-router-dom";
+import { useQuery } from "react-query";
+import { useMatch, useNavigate } from "react-router-dom";
 import styled from "styled-components";
-import { IGetMoviesResult } from "../api";
+import {
+  getMoviesActor,
+  getMoviesDetail,
+  IGetMoviesActorResult,
+  IGetMoviesDetailResult,
+  IGetMoviesResult,
+} from "../api";
 import { makeImagePath, useWindowDimensions } from "../utils";
 
 const SliderRow = styled(motion.div)`
@@ -31,6 +38,7 @@ const Box = styled(motion.div)<{ $bgPhoto: string }>`
   background-image: url(${(props) => props.$bgPhoto});
   background-size: cover;
   background-position: center center;
+  border-radius: 15px;
   height: 200px;
   cursor: pointer;
   &:first-child {
@@ -81,6 +89,7 @@ const Overlay = styled(motion.div)`
   height: 100%;
   background-color: rgba(0, 0, 0, 0.5);
   opacity: 0;
+  z-index: 3;
 `;
 
 const BigMovie = styled(motion.div)`
@@ -92,8 +101,12 @@ const BigMovie = styled(motion.div)`
   margin: 0 auto;
   border-radius: 15px;
   overflow: hidden;
+  overflow-y: scroll;
+  ::-webkit-scrollbar {
+    display: none;
+  }
   background-color: ${(props) => props.theme.black.lighter};
-  z-index: 2;
+  z-index: 3;
 `;
 
 const BigCover = styled.div`
@@ -105,20 +118,38 @@ const BigCover = styled.div`
 
 const BigTitle = styled.h3`
   color: ${(props) => props.theme.white.lighter};
-  padding: 20px;
   font-size: 46px;
   position: relative;
   top: -80px;
+  padding: 10px 20px;
 `;
 
 const BigOverview = styled.p`
-  padding: 20px;
   position: relative;
   top: -80px;
   color: ${(props) => props.theme.white.lighter};
+  padding: 10px;
 `;
 
-const BigRank = styled.p``;
+const BigRank = styled.p`
+  position: relative;
+  top: -80px;
+`;
+
+const BigDate = styled.p`
+  position: relative;
+  top: -80px;
+`;
+
+const BigGenres = styled.p`
+  position: relative;
+  top: -80px;
+`;
+
+const BigActor = styled.p`
+  position: relative;
+  top: -80px;
+`;
 
 const rowVariants: Variants = {
   hidden: ({
@@ -165,7 +196,7 @@ const infoVariants: Variants = {
   hover: {
     opacity: 1,
     transition: {
-      delay: 0.5,
+      delay: 0.7,
       duration: 0.3,
       type: "tween",
     },
@@ -181,15 +212,22 @@ interface ISlider {
 function Sliders({ type, title, data }: ISlider) {
   const width = useWindowDimensions();
   const navigate = useNavigate();
-  const bigMovieMatch: PathMatch<string> | null = useMatch(
-    `/movies/${type}/:movieId`
-  );
+  const bigMovieMatch = useMatch(`/movie/${type}/:movieId`);
   const { scrollY } = useScroll();
   const offset = 6;
   const [index, setIndex] = useState(0);
   const [leaving, setLeaving] = useState(false);
-
   const [clickReverse, setClickReverse] = useState(false);
+
+  const { data: moviesDetailData } = useQuery<IGetMoviesDetailResult>(
+    [bigMovieMatch?.params.movieId, "MoviesDetail"],
+    () => getMoviesDetail(+bigMovieMatch?.params.movieId!)
+  );
+
+  const { data: moviesActorData } = useQuery<IGetMoviesActorResult>(
+    [bigMovieMatch?.params.movieId, "MoviesActor"],
+    () => getMoviesActor(+bigMovieMatch?.params.movieId!)
+  );
 
   const decreaseIndex = () => {
     if (data) {
@@ -217,7 +255,7 @@ function Sliders({ type, title, data }: ISlider) {
   };
   const toggleLeaving = () => setLeaving((prev) => !prev);
   const onBoxClicked = (movieId: number, type: string) => {
-    navigate(`/movies/${type}/${movieId}`);
+    navigate(`/movie/${type}/${movieId}`);
   };
   const onOverlayClick = () => navigate("/");
   const clickedMovie =
@@ -314,6 +352,19 @@ function Sliders({ type, title, data }: ISlider) {
                     {clickedMovie.overview || "No Overview"}
                   </BigOverview>
                   <BigRank>{clickedMovie.vote_average}</BigRank>
+                  <BigDate>{clickedMovie.release_date}</BigDate>
+
+                  <BigGenres>
+                    {moviesDetailData?.genres.map((data) => (
+                      <span key={data.id}>{data.name}</span>
+                    ))}
+                  </BigGenres>
+
+                  <BigActor>
+                    {moviesActorData?.cast.slice(0, 3).map((data) => (
+                      <span key={data.id}>{data.name}</span>
+                    ))}
+                  </BigActor>
                 </>
               )}
             </BigMovie>
