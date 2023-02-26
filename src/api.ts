@@ -34,27 +34,38 @@ export interface IGetMoviesActorResult {
     id: number;
     name: string;
   }[];
-  crew: {
-    name: string;
+}
+
+export interface IGetMoviesVideoResult {
+  results: {
+    id: string;
+    key: string;
+    type: string;
   }[];
 }
 
 export function getMovies(type: string) {
-  return fetch(`${BASE_PATH}/movie/${type}?api_key=${API_KEY}`).then(
+  return fetch(`${BASE_PATH}/movie/${type}?api_key=${API_KEY}&region=kr`).then(
     (response) => response.json()
   );
 }
 
 export function getMoviesDetail(id: number) {
-  return fetch(`${BASE_PATH}/movie/${id}?api_key=${API_KEY}`).then((response) =>
-    response.json()
+  return fetch(`${BASE_PATH}/movie/${id}?api_key=${API_KEY}&region=kr`).then(
+    (response) => response.json()
   );
 }
 
 export function getMoviesActor(id: number) {
-  return fetch(`${BASE_PATH}/movie/${id}/credits?api_key=${API_KEY}`).then(
-    (response) => response.json()
-  );
+  return fetch(
+    `${BASE_PATH}/movie/${id}/credits?api_key=${API_KEY}&region=kr`
+  ).then((response) => response.json());
+}
+
+export function getMoviesVideo(id: number) {
+  return fetch(
+    `${BASE_PATH}/movie/${id}/videos?api_key=${API_KEY}&region=kr`
+  ).then((response) => response.json());
 }
 
 interface ITv {
@@ -63,6 +74,8 @@ interface ITv {
   poster_path: string;
   name: string;
   overview: string;
+  vote_average: string;
+  first_air_date: string;
 }
 
 export interface IGetTvResult {
@@ -72,9 +85,33 @@ export interface IGetTvResult {
   total_results: number;
 }
 
+export interface IGetTvDetailResult {
+  genres: {
+    id: number;
+    name: string;
+  }[];
+}
+
+export interface IGetTvActorResult {
+  cast: {
+    id: number;
+    name: string;
+  }[];
+}
+
 export function getTv(type: string) {
   return fetch(`${BASE_PATH}/tv/${type}?api_key=${API_KEY}`).then((response) =>
     response.json()
+  );
+}
+export function getTvDetail(id: number) {
+  return fetch(`${BASE_PATH}/tv/${id}?api_key=${API_KEY}`).then((response) =>
+    response.json()
+  );
+}
+export function getTvActor(id: number) {
+  return fetch(`${BASE_PATH}/tv/${id}/credits?api_key=${API_KEY}`).then(
+    (response) => response.json()
   );
 }
 
@@ -84,6 +121,8 @@ interface ISearch {
   poster_path: string;
   title: string;
   overview: string;
+  vote_average: string;
+  release_date: string;
 }
 
 export interface IGetSearchResult {
