@@ -141,6 +141,7 @@ const ModalInfoOne = styled.div`
 const ModalDate = styled.span`
   margin-right: 10px;
 `;
+
 const ModalRank = styled.span`
   color: ${(props) => props.theme.red};
 `;
@@ -220,7 +221,7 @@ interface ISlider {
 function Sliders({ type, title, data }: ISlider) {
   const width = useWindowDimensions();
   const navigate = useNavigate();
-  const bigMovieMatch = useMatch(`/movie/${type}/:movieId`);
+  const modalMovieMatch = useMatch(`/movie/${type}/:movieId`);
   const { scrollY } = useScroll();
   const offset = 6;
   const [index, setIndex] = useState(0);
@@ -228,13 +229,13 @@ function Sliders({ type, title, data }: ISlider) {
   const [clickReverse, setClickReverse] = useState(false);
 
   const { data: moviesDetailData } = useQuery<IGetMoviesDetailResult>(
-    [bigMovieMatch?.params.movieId, "MoviesDetail"],
-    () => getMoviesDetail(+bigMovieMatch?.params.movieId!)
+    [modalMovieMatch?.params.movieId, "MoviesDetail"],
+    () => getMoviesDetail(+modalMovieMatch?.params.movieId!)
   );
 
   const { data: moviesActorData } = useQuery<IGetMoviesActorResult>(
-    [bigMovieMatch?.params.movieId, "MoviesActor"],
-    () => getMoviesActor(+bigMovieMatch?.params.movieId!)
+    [modalMovieMatch?.params.movieId, "MoviesActor"],
+    () => getMoviesActor(+modalMovieMatch?.params.movieId!)
   );
 
   const decreaseIndex = () => {
@@ -267,9 +268,9 @@ function Sliders({ type, title, data }: ISlider) {
   };
   const onOverlayClick = () => navigate("/");
   const clickedMovie =
-    bigMovieMatch?.params.movieId &&
+    modalMovieMatch?.params.movieId &&
     data?.results.find(
-      (movie) => movie.id + "" === bigMovieMatch.params.movieId
+      (movie) => movie.id + "" === modalMovieMatch.params.movieId
     );
 
   return (
@@ -291,7 +292,6 @@ function Sliders({ type, title, data }: ISlider) {
             custom={{ width, clickReverse }}
           >
             {data?.results
-              .slice(1)
               .slice(offset * index, offset * index + offset)
               .map((movie) => (
                 <Box
@@ -334,7 +334,7 @@ function Sliders({ type, title, data }: ISlider) {
         </SliderBtn>
       </SliderRow>
       <AnimatePresence>
-        {bigMovieMatch ? (
+        {modalMovieMatch ? (
           <>
             <Overlay
               onClick={onOverlayClick}
@@ -343,7 +343,7 @@ function Sliders({ type, title, data }: ISlider) {
             />
             <ModalMovie
               style={{ top: scrollY.get() + 150 }}
-              layoutId={bigMovieMatch.params.movieId + type}
+              layoutId={modalMovieMatch.params.movieId + type}
             >
               {clickedMovie && (
                 <>

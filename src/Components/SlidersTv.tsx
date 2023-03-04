@@ -211,16 +211,16 @@ const infoVariants: Variants = {
   },
 };
 
-interface ISlider {
+interface ISliderTv {
   type: string;
   title: string;
   data: IGetTvResult;
 }
 
-function SlidersTv({ type, title, data }: ISlider) {
+function SlidersTv({ type, title, data }: ISliderTv) {
   const width = useWindowDimensions();
   const navigate = useNavigate();
-  const bigTvMatch = useMatch(`/tv/${type}/:tvId`);
+  const modalTvMatch = useMatch(`/tv/${type}/:tvId`);
   const { scrollY } = useScroll();
   const offset = 6;
   const [index, setIndex] = useState(0);
@@ -228,13 +228,13 @@ function SlidersTv({ type, title, data }: ISlider) {
   const [clickReverse, setClickReverse] = useState(false);
 
   const { data: tvDetailData } = useQuery<IGetTvDetailResult>(
-    [bigTvMatch?.params.tvId, "TvDetail"],
-    () => getTvDetail(+bigTvMatch?.params.tvId!)
+    [modalTvMatch?.params.tvId, "TvDetail"],
+    () => getTvDetail(+modalTvMatch?.params.tvId!)
   );
 
   const { data: tvActorData } = useQuery<IGetTvActorResult>(
-    [bigTvMatch?.params.tvId, "TvActor"],
-    () => getTvActor(+bigTvMatch?.params.tvId!)
+    [modalTvMatch?.params.tvId, "TvActor"],
+    () => getTvActor(+modalTvMatch?.params.tvId!)
   );
 
   const decreaseIndex = () => {
@@ -267,8 +267,8 @@ function SlidersTv({ type, title, data }: ISlider) {
   };
   const onOverlayClick = () => navigate("/tv");
   const clickedTv =
-    bigTvMatch?.params.tvId &&
-    data?.results.find((tv) => tv.id + "" === bigTvMatch.params.tvId);
+    modalTvMatch?.params.tvId &&
+    data?.results.find((tv) => tv.id + "" === modalTvMatch.params.tvId);
 
   return (
     <>
@@ -289,7 +289,6 @@ function SlidersTv({ type, title, data }: ISlider) {
             custom={{ width, clickReverse }}
           >
             {data?.results
-              .slice(1)
               .slice(offset * index, offset * index + offset)
               .map((tv) => (
                 <Box
@@ -332,7 +331,7 @@ function SlidersTv({ type, title, data }: ISlider) {
         </SliderBtn>
       </SliderRow>
       <AnimatePresence>
-        {bigTvMatch ? (
+        {modalTvMatch ? (
           <>
             <Overlay
               onClick={onOverlayClick}
@@ -341,7 +340,7 @@ function SlidersTv({ type, title, data }: ISlider) {
             />
             <ModalTv
               style={{ top: scrollY.get() + 150 }}
-              layoutId={bigTvMatch.params.tvId + type}
+              layoutId={modalTvMatch.params.tvId + type}
             >
               {clickedTv && (
                 <>
