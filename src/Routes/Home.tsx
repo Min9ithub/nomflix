@@ -1,7 +1,12 @@
 import { Helmet } from "react-helmet";
 import { useQuery } from "react-query";
 import styled from "styled-components";
-import { getMovies, IGetMoviesResult } from "../api";
+import {
+  getMovies,
+  getMoviesVideo,
+  IGetMoviesResult,
+  IGetMoviesVideoResult,
+} from "../api";
 import Sliders from "../Components/Sliders";
 import { makeImagePath } from "../utils";
 
@@ -32,6 +37,7 @@ const Title = styled.h2`
   font-weight: 700;
   margin-bottom: 20px;
 `;
+
 const Overview = styled.p`
   font-size: 30px;
   width: 50%;
@@ -49,6 +55,11 @@ function Home() {
 
   const { data: popularData, isLoading: loadingPopular } =
     useQuery<IGetMoviesResult>("popular", () => getMovies("popular"));
+
+  const { data: movieVideoData } = useQuery<IGetMoviesVideoResult>(
+    [topRatedData?.results[0].id, "videos"],
+    () => getMoviesVideo(topRatedData?.results[0].id!)
+  );
 
   return (
     <>
