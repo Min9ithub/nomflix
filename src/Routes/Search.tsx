@@ -1,10 +1,9 @@
-import { motion, Variants } from "framer-motion";
-import { useState } from "react";
+import { Helmet } from "react-helmet";
 import { useQuery } from "react-query";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import styled from "styled-components";
-import { getSearch, IGetSearchResult } from "../api";
-import { makeImagePath } from "../utils";
+import { getMovieSearch, getTvSearch, IGetSearchResult } from "../api";
+import SlidersSearch from "../Components/SlidersSearch";
 
 const Wrapper = styled.div`
   background-color: black;
@@ -17,89 +16,44 @@ const Loader = styled.div`
   align-items: center;
 `;
 
-const Row = styled.div`
-  display: grid;
-  gap: 5px;
-  grid-template-columns: repeat(6, 1fr);
-  margin: 0 55px;
-  margin-top: 200px;
-`;
-
-const Box = styled(motion.div)<{ bgPhoto: string }>`
-  margin-bottom: 100px;
-  background-color: white;
-  background-image: url(${(props) => props.bgPhoto});
-  background-size: cover;
-  background-position: center center;
-  width: 200px;
-  height: 275px;
-  cursor: pointer;
-  &:first-child {
-    transform-origin: center left;
-  }
-  &:last-child {
-    transform-origin: center right;
-  }
-`;
-
-const boxVariants: Variants = {
-  normal: {
-    scale: 1,
-  },
-  hover: {
-    scale: 1.3,
-    transition: {
-      delay: 0.5,
-      duration: 0.3,
-      type: "tween",
-    },
-  },
-};
-
-// const offset = 30;
-
 function Search() {
   const location = useLocation();
-  const navigate = useNavigate();
   const keyword = new URLSearchParams(location.search).get("keyword");
-  const [index, setIndex] = useState(0);
-  const { data, isLoading } = useQuery<IGetSearchResult>(
-    ["search", keyword],
-    () => getSearch(keyword)
-  );
 
-  const onBoxClicked = (movie: number) => {
-    navigate(`/movies/${movie}`);
-  };
+  const { data: movieSearchData, isLoading: loadingMovieSearch } =
+    useQuery<IGetSearchResult>(["Movie Search", keyword], () =>
+      getMovieSearch(keyword)
+    );
+
+  const { data: tvSearchData, isLoading: loadingTvSearch } =
+    useQuery<IGetSearchResult>(["Tv Search", keyword], () =>
+      getTvSearch(keyword)
+    );
 
   return (
-    <Wrapper>
-      {isLoading ? (
-        <Loader>Loading...</Loader>
-      ) : (
-        <>
-          <Row>
-            {data?.results
-              .slice(0)
-              .slice(
-                data.results.length * index,
-                data.results.length * index + data.results.length
-              )
-              .map((data) => (
-                <Box
-                  key={data.id}
-                  whileHover="hover"
-                  initial="normal"
-                  variants={boxVariants}
-                  // onClick={() => onBoxClicked(movie.id)}
-                  transition={{ type: "tween" }}
-                  bgPhoto={makeImagePath(data.poster_path, "w500")}
-                ></Box>
-              ))}
-          </Row>
-        </>
-      )}
-    </Wrapper>
+    <>
+      <Helmet>
+        <title>Search</title>
+      </Helmet>
+      <Wrapper>
+        {loadingMovieSearch && loadingTvSearch ? (
+          <Loader>Loading...</Loader>
+        ) : (
+          <>
+            <SlidersSearch
+              type={"movie"}
+              title={`Search for '${keyword}' in movie`}
+              data={movieSearchData as IGetSearchResult}
+            />
+            <SlidersSearch
+              type={"tv"}
+              title={`Search for '${keyword}' in tv`}
+              data={tvSearchData as IGetSearchResult}
+            />
+          </>
+        )}
+      </Wrapper>
+    </>
   );
 }
 
