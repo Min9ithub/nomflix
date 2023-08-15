@@ -1,9 +1,9 @@
-import ReactDOM from "react-dom/client";
-import { RecoilRoot } from "recoil";
-import { ThemeProvider, createGlobalStyle } from "styled-components";
-import { QueryClient, QueryClientProvider } from "react-query";
-import { theme } from "./theme";
-import App from "./App";
+import ReactDOM from 'react-dom/client'
+import { RecoilRoot } from 'recoil'
+import { ThemeProvider, createGlobalStyle } from 'styled-components'
+import { QueryClient, QueryClientProvider } from 'react-query'
+import { theme } from './theme'
+import App from './Components/App'
 
 const GlobalStyle = createGlobalStyle`
 @import url('https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@300;400&display=swap');
@@ -67,24 +67,18 @@ a{
   text-decoration: none;
   color: inherit;
 }
-`;
+`
 
-const client = new QueryClient();
+const client = new QueryClient()
 
-const root = ReactDOM.createRoot(
-  document.getElementById("root") as HTMLElement
-);
+const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement)
 root.render(
-  <RecoilRoot>
-    <QueryClientProvider client={client}>
-      <ThemeProvider theme={theme}>
-        <GlobalStyle />
-        <App />
-      </ThemeProvider>
-    </QueryClientProvider>
-  </RecoilRoot>
-);
-
-// If you want to start measuring performance in your app, pass a function
-// to log results (for example: reportWebVitals(console.log))
-// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
+    <RecoilRoot>
+        <QueryClientProvider client={client}>
+            <ThemeProvider theme={theme}>
+                <GlobalStyle />
+                <App />
+            </ThemeProvider>
+        </QueryClientProvider>
+    </RecoilRoot>
+)
