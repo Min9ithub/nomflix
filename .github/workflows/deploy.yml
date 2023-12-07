@@ -13,6 +13,17 @@ jobs:
       - name: checkout Github Action
         uses: actions/checkout@v3
 
+      - name: .env setting
+        run: |
+          echo "REACT_APP_MOVIE_API_KEY=${{secrets.REACT_APP_MOVIE_API_KEY}}" >> .env
+          echo "REACT_APP_API_KEY=${{secrets.REACT_APP_API_KEY}}" >> .env
+          echo "REACT_APP_AUTH_DOMAIN=${{secrets.REACT_APP_AUTH_DOMAIN}}" >> .env
+          echo "REACT_APP_PROJECT_ID${{secrets.REACT_APP_PROJECT_ID}}" >> .env
+          echo "REACT_APP_STORAGE_BUCKET${{secrets.REACT_APP_STORAGE_BUCKET}}" >> .env
+          echo "REACT_APP_MESSAGIN_ID${{secrets.REACT_APP_MESSAGIN_ID}}" >> .env
+          echo "REACT_APP_APP_ID${{secrets.REACT_APP_APP_ID}}" >> .env
+          echo "REACT_APP_BEARER_TOKEN${{secrets.REACT_APP_BEARER_TOKEN}}" >> .env
+
       - name: Install dependencies
         run: npm install
 
