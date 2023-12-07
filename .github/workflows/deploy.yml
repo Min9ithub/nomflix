@@ -29,7 +29,7 @@ jobs:
       - name: Deploy to S3
         env:
           BUCKET_NAME: ${{secrets.AWS_BUCKET_NAME}}
-        run: aws s3 sync \ ./build s3://$BUCKET_NAME
+        run: aws s3 sync ./build s3://$BUCKET_NAME --acl bucket-owner-full-control
 
       - name: Invalidate CloudFront Cache
         run: aws cloudfront create-invalidation --distribution-id ${{secrets.AWS_CLOUDFRONT_ID}}
