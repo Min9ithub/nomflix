@@ -44,27 +44,37 @@ export interface IGetMoviesVideoResult {
   }[];
 }
 
+const options = {
+  method: "GET",
+  headers: {
+    accept: "application/json",
+    Authorization: "Bearer 2960e9da3af49fc01ffe50b6ccbf22da",
+  },
+};
+
 export function getMovies(type: string) {
-  return fetch(`${BASE_PATH}/movie/${type}?api_key=${API_KEY}&region=kr`).then(
+  return fetch(`${BASE_PATH}/movie/${type}?api_key=${API_KEY}`, options).then(
     (response) => response.json()
   );
 }
 
 export function getMoviesDetail(id: number) {
-  return fetch(`${BASE_PATH}/movie/${id}?api_key=${API_KEY}&region=kr`).then(
+  return fetch(`${BASE_PATH}/movie/${id}?api_key=${API_KEY}`, options).then(
     (response) => response.json()
   );
 }
 
 export function getMoviesActor(id: number) {
   return fetch(
-    `${BASE_PATH}/movie/${id}/credits?api_key=${API_KEY}&region=kr`
+    `${BASE_PATH}/movie/${id}/credits?api_key=${API_KEY}`,
+    options
   ).then((response) => response.json());
 }
 
 export function getMoviesVideo(id: number) {
   return fetch(
-    `${BASE_PATH}/movie/${id}/videos?api_key=${API_KEY}&region=kr`
+    `${BASE_PATH}/movie/${id}/videos?api_key=${API_KEY}`,
+    options
   ).then((response) => response.json());
 }
 
