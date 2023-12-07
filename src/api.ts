@@ -48,7 +48,7 @@ const options = {
   method: "GET",
   headers: {
     accept: "application/json",
-    Authorization: "Bearer 2960e9da3af49fc01ffe50b6ccbf22da",
+    Authorization: `Bearer ${process.env.REACT_APP_BEARER_TOKEN}`,
   },
 };
 
